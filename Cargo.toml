@@ -1,0 +1,6 @@
+[workspace]
+
+members = [
+  "crates/holochain_json_api",
+  "crates/holochain_json_derive"
+]

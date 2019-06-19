@@ -1,0 +1,21 @@
+[package]
+name = "holochain_json_derive"
+version = "0.0.1-alpha1"
+authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
+description = "Provides derive macros for holochain persistence."
+edition="2018"
+keywords = ["holochain", "holo", "json", "serde", "derive"]
+categories = ["parsing"]
+license = "Apache-2.0"
+readme = "README.md"
+documentation = "https://docs.rs/holochain_json_derive"
+repository = "https://github.com/holochain/holochain-serialization"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "=0.15.31"
+quote = "=0.6.11"
+serde = "=1.0.89"
+serde_json = { version = "=1.0.39", features = ["preserve_order"] }

@@ -1,0 +1,37 @@
+[package]
+name = "holochain_json_api"
+version = "0.0.1-alpha1"
+authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
+build = "build.rs"
+description = "json api and utilities for holochain"
+keywords = ["holochain", "holo", "json", "serialization", "serde"]
+categories = ["database"]
+license = "Apache-2.0"
+readme = "README.md"
+documentation = "https://docs.rs/holochain_json_api"
+repository = "https://github.com/holochain/holochain-serialization"
+
+[dependencies]
+arrayref = "=0.3.5"
+base64 = "=0.10.1"
+chrono = "=0.4.6"
+serde = "=1.0.89"
+serde_derive = "=1.0.89"
+serde_json = { version = "=1.0.39", features = ["preserve_order"] }
+multihash = "=0.8.0"
+futures-preview = "=0.3.0-alpha.12"
+futures-core-preview = "=0.3.0-alpha.12"
+futures-channel-preview = "=0.3.0-alpha.12"
+futures-executor-preview = "=0.3.0-alpha.12"
+futures-io-preview = "=0.3.0-alpha.12"
+futures-sink-preview = "=0.3.0-alpha.12"
+futures-util-preview = "=0.3.0-alpha.12"
+hcid = "=0.0.6"
+shrinkwraprs = "=0.2.1"
+rust-base58 = "=0.0.4"
+objekt= "=0.1.2"
+holochain_json_derive = "=0.0.1-alpha1"
+uuid = { version = "=0.7.1", features = ["v4"] }
+
+[dev-dependencies]
+maplit = "=1.0.1"
