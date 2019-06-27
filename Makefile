@@ -11,7 +11,6 @@ CLP_VER_WANT = "clippy 0.0.212 (280069d 2019-01-22)"
 all: test
 
 test: tools
-	RUSTFLAGS='$(RUSTFLAGS)' cargo fmt -- --check
 	RUSTFLAGS='$(RUSTFLAGS)' cargo clippy -- \
 		-A clippy::nursery -A clippy::style -A clippy::cargo \
 		-A clippy::pedantic -A clippy::restriction \
