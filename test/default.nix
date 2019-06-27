@@ -4,7 +4,8 @@ let
 
   script = pkgs.writeShellScriptBin name
   ''
-  hn-rust-fmt-check
+  hn-rust-fmt-check \
+  && cargo test
   '';
 in
 {
