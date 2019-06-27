@@ -7,9 +7,3 @@ jobs:
   steps:
    - checkout
    - run: nix-shell --run hcs-test
-
-workflows:
- version: 2
- tests:
-  jobs:
-   - build
