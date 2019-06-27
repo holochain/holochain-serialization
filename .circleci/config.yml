@@ -6,7 +6,7 @@ jobs:
    - image: holochain/holochain-rust:circle.01.warm.nix
   steps:
    - checkout
-   - run: make test
+   - run: nix-shell --run hcs-test
 
 workflows:
  version: 2
