@@ -1,0 +1,9 @@
+version: 2
+
+jobs:
+ build:
+  docker:
+   - image: holochain/holochain-rust:circle.01.warm.nix
+  steps:
+   - checkout
+   - run: nix-shell --run hcs-test
