@@ -62,7 +62,7 @@ hn-release-hook-publish-rust \
   # the commit hash that the release process should target
   # this will always be behind what ends up being deployed
   # the release process needs to add some commits for changelog etc.
-  commit = "8a28c77ff9a0eefc0e28c62f2666e9101020c673";
+  commit = "28eb999470dbbb9945322c760134895450877630";
 
   # the semver for prev and current releases
   # the previous version will be scanned/bumped by release scripts
