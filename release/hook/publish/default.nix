@@ -7,6 +7,7 @@ set -euox pipefail
 echo "packaging for crates.io"
 # order is important here due to dependencies
 for crate in \
+ holochain_json_derive \
  holochain_json_api
 do
  cargo package --manifest-path "crates/$crate/Cargo.toml"
