@@ -49,6 +49,7 @@ hn-release-hook-preflight-manual
    version = ''
 hn-release-hook-version-readme
 hn-release-hook-version-rust
+hcs-release-hook-version
 '';
 
    # publish artifacts to the world
