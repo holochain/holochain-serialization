@@ -68,7 +68,7 @@ hn-release-hook-publish-rust \
   # the previous version will be scanned/bumped by release scripts
   # the current version is what the release scripts bump *to*
   version = {
-   current = "0.0.7";
+   current = "0.0.8";
    # not used by version hooks in this repo
    previous = "_._._";
   };
