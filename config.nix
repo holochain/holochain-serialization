@@ -1,16 +1,53 @@
 {
+
+ # configure holonix itself
+ holonix = {
+
+  # true = use a github repository as the holonix base (recommended)
+  # false = use a local copy of holonix (useful for debugging)
+  use-github = true;
+
+  # configure the remote holonix github when use-github = true
+  github = {
+
+   # can be any github ref
+   # branch, tag, commit, etc.
+   ref = "0.0.15";
+
+   # the sha of what is downloaded from the above ref
+   # note: even if you change the above ref it will not be redownloaded until
+   #       the sha here changes (the sha is the cache key for downloads)
+   # note: to get a new sha, get nix to try and download a bad sha
+   #       it will complain and tell you the right sha
+   sha256 = "0pxlfz6pvzxlqjh6dz8lgrgc3k5s62zm7d0gllqmdvfw4qy3ffqy";
+
+   # the github owner of the holonix repo
+   owner = "holochain";
+
+   # the name of the holonix repo
+   repo = "holonix";
+  };
+
+  # configuration for when use-github = false
+  local = {
+   # the path to the local holonix copy
+   path = ./.;
+  };
+
+ };
+
  release = {
   # the commit hash that the release process should target
   # this will always be behind what ends up being deployed
   # the release process needs to add some commits for changelog etc.
-  commit = "0095ae8451d954ca4fef76aac76c4aa40add0dad";
+  commit = "b759e5ff3beda2e15ad3797073829de7ac1adf1a";
 
   # the semver for prev and current releases
   # the previous version will be scanned/bumped by release scripts
   # the current version is what the release scripts bump *to*
   version = {
-   current = "0.0.2";
-   previous = "0.0.1-alpha2";
+   current = "0.0.3";
+   previous = "0.0.2";
   };
 
   github = {
