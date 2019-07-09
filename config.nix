@@ -3,7 +3,7 @@
   # the commit hash that the release process should target
   # this will always be behind what ends up being deployed
   # the release process needs to add some commits for changelog etc.
-  commit = "0095ae8451d954ca4fef76aac76c4aa40add0dad";
+  commit = "b759e5ff3beda2e15ad3797073829de7ac1adf1a";
 
   # the semver for prev and current releases
   # the previous version will be scanned/bumped by release scripts
