@@ -60,7 +60,7 @@ hcs-release-hook-publish
   # the commit hash that the release process should target
   # this will always be behind what ends up being deployed
   # the release process needs to add some commits for changelog etc.
-  commit = "496cc0e0b598bfc061a42e0a63f1da0662626f84";
+  commit = "1513feab17d9a069df04e19ecc1b484ac2877a71";
 
   # the semver for prev and current releases
   # the previous version will be scanned/bumped by release scripts
