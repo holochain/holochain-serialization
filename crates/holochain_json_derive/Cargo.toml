@@ -1,6 +1,6 @@
 [package]
 name = "holochain_json_derive"
-version = "0.0.4"
+version = "0.0.5"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 description = "Provides derive macros for holochain persistence."
 edition="2018"
