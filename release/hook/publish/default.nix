@@ -11,7 +11,7 @@ do
  cargo package --manifest-path "crates/$crate/Cargo.toml"
  cargo publish --manifest-path "crates/$crate/Cargo.toml"
 
- while ! cargo search -- $crate | grep -q '$crate = "${config.release.version.current}"';
+ while ! cargo search -- $crate | grep -q "$crate = \"${config.release.version.current}\"";
  do
   echo 'waiting for crates.io to finish publishing ${config.release.version.current}'
  done
