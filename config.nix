@@ -5,7 +5,7 @@
 
   # true = use a github repository as the holonix base (recommended)
   # false = use a local copy of holonix (useful for debugging)
-  use-github = true;
+  use-github = false;
 
   # configure the remote holonix github when use-github = true
   github = {
@@ -31,7 +31,7 @@
   # configuration for when use-github = false
   local = {
    # the path to the local holonix copy
-   path = ./.;
+   path = ../holonix;
   };
 
  };
@@ -54,7 +54,9 @@ hcs-release-hook-version
 
    # publish artifacts to the world
    publish = ''
-echo "All finished!!!"
+hn-release-hook-publish-rust \
+ crates/holochain_json_derive/Cargo.toml \
+ crates/holochain_json_api/Cargo.toml
 '';
   };
 
@@ -67,8 +69,8 @@ echo "All finished!!!"
   # the previous version will be scanned/bumped by release scripts
   # the current version is what the release scripts bump *to*
   version = {
-   current = "0.0.4";
-   previous = "0.0.1-alpha2";
+   current = "0.0.5";
+   previous = "0.0.4";
   };
 
   github = {
