@@ -28,7 +28,6 @@ futures-sink-preview = "=0.3.0-alpha.16"
 futures-util-preview = "=0.3.0-alpha.16"
 hcid = "=0.0.6"
 shrinkwraprs = "=0.2.1"
-rust-base58 = "=0.0.4"
 objekt = "=0.1.2"
 # keep the version on the left hand side
 # there is a regex in the release hook looking for it
