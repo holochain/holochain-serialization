@@ -2,6 +2,23 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.16] - 2019-08-05
+
+### Added
+
+### Changed
+
+- updated holonix to 0.0.22
+- updated futures crates to 0.3.0-alpha17
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [0.0.15] - 2019-07-15
 
 ### Added

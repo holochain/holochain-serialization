@@ -8,9 +8,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
-- updated holonix to 0.0.22
-- updated futures crates to 0.3.0-alpha17
-
 ### Deprecated
 
 ### Removed
@@ -18,3 +15,4 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Fixed
 
 ### Security
+
