@@ -54,6 +54,22 @@ impl JsonString {
     }
 }
 
+impl Deref for JsonString {
+    type Target = String;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for JsonString {
+    type Target = String;
+
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl From<bool> for JsonString {
     fn from(u: bool) -> JsonString {
         default_to_json(u)
