@@ -187,5 +187,4 @@ mod tests {
             assert_eq!(output, &input.to_string());
         }
     }
-
 }
