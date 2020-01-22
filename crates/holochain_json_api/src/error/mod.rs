@@ -11,6 +11,7 @@ use std::{
     io::{self, Error as IoError},
     option::NoneError,
 };
+use wasmer_runtime::error::RuntimeError;
 
 //--------------------------------------------------------------------------------------------------
 // JsonError
@@ -28,6 +29,12 @@ pub enum JsonError {
 impl JsonError {
     pub fn new(msg: &str) -> JsonError {
         JsonError::ErrorGeneric(msg.to_string())
+    }
+}
+
+impl From<JsonError> for RuntimeError {
+    fn from(json_error: JsonError) -> RuntimeError {
+        RuntimeError::Trap{ msg: json_error.to_string().into_boxed_str() }
     }
 }
 

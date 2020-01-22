@@ -14,5 +14,6 @@ extern crate serde_derive;
 extern crate holochain_json_derive;
 #[macro_use]
 extern crate shrinkwraprs;
+extern crate wasmer_runtime;
 pub mod error;
 pub mod json;

@@ -33,6 +33,7 @@ objekt = "=0.1.2"
 # there is a regex in the release hook looking for it
 holochain_json_derive = { version = "=0.0.17", path = "../holochain_json_derive" }
 uuid = { version = "=0.7.1", features = ["v4"] }
+wasmer-runtime = "=0.13.1"
 
 [dev-dependencies]
 maplit = "=1.0.1"
