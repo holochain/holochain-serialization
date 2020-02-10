@@ -60,13 +60,13 @@ hcs-release-hook-version
   # the commit hash that the release process should target
   # this will always be behind what ends up being deployed
   # the release process needs to add some commits for changelog etc.
-  commit = "39dfb3f9f006217f7e3dafc6ae63f1a707329f58";
+  commit = "11f9dced5f385ecd439c9d82b1b12aafca232cfe";
 
   # the semver for prev and current releases
   # the previous version will be scanned/bumped by release scripts
   # the current version is what the release scripts bump *to*
   version = {
-   current = "0.0.19";
+   current = "0.0.20";
    # not used by version hooks in this repo
    previous = "_._._";
   };
