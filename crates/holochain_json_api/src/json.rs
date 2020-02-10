@@ -35,11 +35,6 @@ impl JsonString {
         self == &Self::null()
     }
 
-    /// achieves the same outcome as serde_json::to_vec()
-    pub fn to_bytes(&self) -> Vec<u8> {
-        self.0.as_bytes().to_vec()
-    }
-
     // Creates a JsonString from stringified json
     // replaces From<String> for JsonString and requires conversions to be explicit
     // This is because string types must be handled differently depending on if
@@ -51,6 +46,15 @@ impl JsonString {
             // remove null characters from both ends
             .trim_matches(char::from(0));
         JsonString(cleaned.to_owned())
+    }
+
+    /// achieves the same outcome as serde_json::to_vec()
+    pub fn to_bytes(&self) -> Vec<u8> {
+        self.0.clone().into_bytes()
+    }
+
+    pub fn from_bytes(bytes: Vec<u8>) -> Self {
+        Self::from_json(&String::from_utf8_lossy(&bytes))
     }
 }
 
@@ -453,11 +457,18 @@ pub mod tests {
     }
 
     #[test]
-    fn json_into_bytes_test() {
+    fn json_bytes_test() {
+        let bytes_vec: Vec<u8> = vec![34, 102, 111, 111, 34];
+
         // note that the byte array has the quote character '/"' at the beginnging and end so it is actually valid json
         assert_eq!(
             JsonString::from(RawString::from("foo")).to_bytes(),
-            vec![34, 102, 111, 111, 34],
+            bytes_vec,
+        );
+
+        assert_eq!(
+            JsonString::from_bytes(bytes_vec),
+            JsonString::from(RawString::from("foo")),
         );
     }
 

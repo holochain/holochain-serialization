@@ -34,7 +34,9 @@ impl JsonError {
 
 impl From<JsonError> for RuntimeError {
     fn from(json_error: JsonError) -> RuntimeError {
-        RuntimeError::Trap{ msg: json_error.to_string().into_boxed_str() }
+        RuntimeError::Trap {
+            msg: json_error.to_string().into_boxed_str(),
+        }
     }
 }
 
