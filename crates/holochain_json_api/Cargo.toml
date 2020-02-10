@@ -1,6 +1,6 @@
 [package]
 name = "holochain_json_api"
-version = "0.0.17"
+version = "0.0.21"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 build = "build.rs"
 description = "json api and utilities for holochain"
@@ -15,9 +15,9 @@ repository = "https://github.com/holochain/holochain-serialization"
 arrayref = "=0.3.5"
 base64 = "=0.10.1"
 chrono = "=0.4.6"
-serde = "=1.0.89"
-serde_derive = "=1.0.89"
-serde_json = { version = "=1.0.39", features = ["preserve_order"] }
+serde = "=1.0.100"
+serde_derive = "=1.0.100"
+serde_json = { version = "=1.0.47", features = ["preserve_order"] }
 multihash = "=0.8.0"
 futures-preview = "=0.3.0-alpha.17"
 futures-core-preview = "=0.3.0-alpha.17"
@@ -31,7 +31,7 @@ shrinkwraprs = "=0.2.1"
 objekt = "=0.1.2"
 # keep the version on the left hand side
 # there is a regex in the release hook looking for it
-holochain_json_derive = { version = "=0.0.17", path = "../holochain_json_derive" }
+holochain_json_derive = { version = "=0.0.21", path = "../holochain_json_derive" }
 uuid = { version = "=0.7.1", features = ["v4"] }
 wasmer-runtime = "=0.13.1"
 
