@@ -7,3 +7,27 @@ jobs:
   steps:
    - checkout
    - run: nix-shell --run hcs-test
+
+ deploy-crates:
+  docker:
+   - image: holochain/holonix:latest
+  steps:
+   - checkout
+   - run:
+      no_output_timeout: 20m
+      command: nix-shell --run "hn-release-hook-publish-crates-io 'holochain_json_derive holochain_json_api'"
+
+workflows:
+ version: 2.1
+ tests:
+  jobs:
+   - build
+
+ deploy:
+  jobs:
+   - deploy-crates:
+      filters:
+       branches:
+        ignore: /.*/
+       tags:
+        only: /^v[0-9]+\.[0-9]+\.[0-9]+$/

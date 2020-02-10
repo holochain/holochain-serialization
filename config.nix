@@ -53,7 +53,7 @@ hcs-release-hook-version
 
    # publish artifacts to the world
    publish = ''
-hcs-release-hook-publish
+   # published from circle
 '';
   };
 
@@ -66,7 +66,7 @@ hcs-release-hook-publish
   # the previous version will be scanned/bumped by release scripts
   # the current version is what the release scripts bump *to*
   version = {
-   current = "0.0.17";
+   current = "0.0.18";
    # not used by version hooks in this repo
    previous = "_._._";
   };
