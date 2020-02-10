@@ -15,9 +15,9 @@ repository = "https://github.com/holochain/holochain-serialization"
 arrayref = "=0.3.5"
 base64 = "=0.10.1"
 chrono = "=0.4.6"
-serde = "=1.0.89"
-serde_derive = "=1.0.89"
-serde_json = { version = "=1.0.39", features = ["preserve_order"] }
+serde = "=1.0.100"
+serde_derive = "=1.0.100"
+serde_json = { version = "=1.0.47", features = ["preserve_order"] }
 multihash = "=0.8.0"
 futures-preview = "=0.3.0-alpha.17"
 futures-core-preview = "=0.3.0-alpha.17"
