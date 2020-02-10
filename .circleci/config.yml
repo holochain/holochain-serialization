@@ -3,14 +3,14 @@ version: 2.1
 jobs:
  build:
   docker:
-   - image: holochain/holonix:latest
+   - image: holochain/holonix:latest.master
   steps:
    - checkout
    - run: nix-shell --run hcs-test
 
  deploy-crates:
   docker:
-   - image: holochain/holonix:latest
+   - image: holochain/holonix:latest.master
   steps:
    - checkout
    - run:
