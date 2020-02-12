@@ -1,6 +1,6 @@
 [package]
 name = "holochain_json_derive"
-version = "0.0.21"
+version = "0.0.22"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 description = "Provides derive macros for holochain persistence."
 edition="2018"
@@ -17,5 +17,5 @@ proc-macro = true
 [dependencies]
 syn = "=0.15.31"
 quote = "=0.6.11"
-serde = "=1.0.100"
+serde = "=1.0.104"
 serde_json = { version = "=1.0.47", features = ["preserve_order"] }
