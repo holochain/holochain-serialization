@@ -184,29 +184,37 @@ enum FakeResult {
     Err(JsonString),
 }
 
-fn result_to_json_string<T: Into<JsonString>, E: Into<JsonString>>(
+fn result_to_json_string<T: 'static + Into<JsonString>, E: 'static + Into<JsonString>>(
     result: Result<T, E>,
 ) -> JsonString {
-    // let is_ok = result.is_ok();
-    // let inner_json: JsonString = match result {
-    //     Ok(inner) => inner.into(),
-    //     Err(inner) => inner.into(),
-    // };
-    // let inner_string = String::from(inner_json);
-    // // JsonString::from_json_unchecked(&format!(
-    // //     "{{\"{}\":{}}}",
-    // //     if is_ok { "Ok" } else { "Err" },
-    // //     inner_string
-    // // ))
-    // let k = if is_ok { "Ok" } else { "Err" };
-    // JsonString::from_json_unchecked(&json!({ k: inner_string }).to_string())
-    match result {
-        Ok(v) => FakeResult::Ok(v.into()).into(),
-        Err(v) => FakeResult::Err(v.into()).into(),
-    }
+    let is_ok = result.is_ok();
+    let inner_json: JsonString = match result {
+        Ok(inner) => {
+            if TypeId::of::<JsonString>() == TypeId::of::<T>() {
+                let j: JsonString = inner.into();
+                JsonString::from(RawString::from(String::from(j)))
+            } else {
+                inner.into()
+            }
+        },
+        Err(inner) => {
+            if TypeId::of::<JsonString>() == TypeId::of::<E>() {
+                let j: JsonString = inner.into();
+                JsonString::from(RawString::from(String::from(j)))
+            } else {
+                inner.into()
+            }
+        }
+    };
+    let inner_string = String::from(inner_json);
+    JsonString::from_json_unchecked(&format!(
+        "{{\"{}\":{}}}",
+        if is_ok { "Ok" } else { "Err" },
+        inner_string
+    ))
 }
 
-impl<T, E> From<Result<T, E>> for JsonString
+impl<T: 'static, E: 'static> From<Result<T, E>> for JsonString
 where
     T: Into<JsonString>,
     E: Into<JsonString>,
@@ -216,7 +224,7 @@ where
     }
 }
 
-impl<T> From<Result<T, String>> for JsonString
+impl<T: 'static> From<Result<T, String>> for JsonString
 where
     T: Into<JsonString>,
 {
@@ -225,7 +233,7 @@ where
     }
 }
 
-impl<E> From<Result<String, E>> for JsonString
+impl<E: 'static> From<Result<String, E>> for JsonString
 where
     E: Into<JsonString>,
 {
@@ -253,17 +261,7 @@ where
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<T, E>, Self::Error> {
-        let outer: FakeResult = self.try_into()?;
-        match outer {
-            FakeResult::Ok(j) => {
-                if TypeId::of::<T>() == TypeId::of::<JsonString>() {
-                    Ok(Ok(default_try_from_json(JsonString::from(RawString::from(String::from(j))))?))
-                } else {
-                    Ok(Ok(default_try_from_json(j)?))
-                }
-            },
-            FakeResult::Err(j) => Ok(Err(default_try_from_json(j)?)),
-        }
+        default_try_from_json(self)
     }
 }
 
@@ -273,17 +271,7 @@ where
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<T, String>, Self::Error> {
-        let outer: FakeResult = self.try_into()?;
-        match outer {
-            FakeResult::Ok(j) => {
-                if TypeId::of::<T>() == TypeId::of::<JsonString>() {
-                    Ok(Ok(default_try_from_json(JsonString::from(RawString::from(String::from(j))))?))
-                } else {
-                    Ok(Ok(default_try_from_json(j)?))
-                }
-            },
-            FakeResult::Err(j) => Ok(Err(default_try_from_json(j)?)),
-        }
+        default_try_from_json(self)
     }
 }
 
@@ -293,28 +281,14 @@ where
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<String, E>, Self::Error> {
-        let outer: FakeResult = self.try_into()?;
-        match outer {
-            FakeResult::Ok(j) => Ok(Ok(default_try_from_json(j)?)),
-            FakeResult::Err(j) => {
-                if TypeId::of::<E>() == TypeId::of::<JsonString>() {
-                    Ok(Ok(default_try_from_json(JsonString::from(RawString::from(String::from(j))))?))
-                } else {
-                    Ok(Err(default_try_from_json(j)?))
-                }
-            },
-        }
+        default_try_from_json(self)
     }
 }
 
 impl TryInto<Result<String, String>> for JsonString {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<String, String>, Self::Error> {
-        let outer: FakeResult = self.try_into()?;
-        match outer {
-            FakeResult::Ok(j) => Ok(Ok(default_try_from_json(j)?)),
-            FakeResult::Err(j) => Ok(Err(default_try_from_json(j)?)),
-        }
+        default_try_from_json(self)
     }
 }
 
@@ -560,15 +534,15 @@ pub mod tests {
     fn json_result_round_trip_test() {
         let result: Result<String, JsonError> = Err(JsonError::ErrorGeneric("foo".into()));
         let expected =
-            JsonString::from_json("{\"Err\":\"{\\\"ErrorGeneric\\\":\\\"foo\\\"}\"}").unwrap();
+            JsonString::from_json("{\"Err\":{\"ErrorGeneric\":\"foo\"}}").unwrap();
 
         assert_eq!(JsonString::from(result.clone()), expected,);
 
         let result_restored: Result<String, JsonError> = expected.try_into().unwrap();
         assert_eq!(result, result_restored);
-        
+
         let result: Result<String, String> = Err(String::from("foo"));
-        let expected = JsonString::from_json("{\"Err\":\"\\\"foo\\\"\"}").unwrap();
+        let expected = JsonString::from_json("{\"Err\":\"foo\"}").unwrap();
 
         assert_eq!(JsonString::from(result.clone()), expected,);
 
