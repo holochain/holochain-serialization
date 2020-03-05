@@ -57,7 +57,7 @@ impl JsonString {
         let _: serde::de::IgnoredAny = match serde_json::from_str(&cleaned) {
             Err(e) => {
                 return Err(JsonError::SerializationError(format!(
-                    "Attempted to create JsonString from invalid JSON. String: {}. Error {}.",
+                    "Attempted to create JsonString from invalid JSON. String: {}. Error: {}.",
                     &cleaned, &e
                 )))
             }
@@ -479,6 +479,12 @@ pub mod tests {
             test.clone(),
             DeriveTest::try_from(JsonString::from(test)).unwrap(),
         );
+    }
+
+    #[test]
+    fn invalid_json_test() {
+        let result = JsonString::from_json("foo");
+        assert_eq!(Err(JsonError::SerializationError("Attempted to create JsonString from invalid JSON. String: foo. Error: expected ident at line 1 column 2.".into())), result,);
     }
 
     #[test]
