@@ -4,11 +4,12 @@
 use crate::error::{JsonError, JsonResult};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json;
-use serde_json::json;
+// use serde_json::json;
 use std::{
     convert::{TryFrom, TryInto},
     fmt::{Debug, Display, Formatter, Result as FmtResult},
 };
+use std::any::TypeId;
 
 /// track json serialization with the rust type system!
 /// JsonString wraps a string containing JSON serialized data
@@ -18,7 +19,7 @@ use std::{
 /// instead, implement and use the native `From` trait to move between types
 /// - moving to/from String, str, JsonString and JsonString simply (un)wraps it as raw JSON data
 /// - moving to/from any other type must offer a reliable serialization/deserialization strategy
-#[derive(Debug, PartialEq, Clone, Hash, Eq, Serialize, Deserialize)]
+#[derive(Debug, PartialEq, Clone, Hash, Eq, Serialize, Deserialize, Default)]
 pub struct JsonString(String);
 
 impl JsonString {
@@ -177,22 +178,32 @@ impl<T: Serialize> From<Vec<T>> for JsonString {
 
 // conversions from result types
 
+#[derive(DefaultJson, Serialize, Deserialize, Debug)]
+enum FakeResult {
+    Ok(JsonString),
+    Err(JsonString),
+}
+
 fn result_to_json_string<T: Into<JsonString>, E: Into<JsonString>>(
     result: Result<T, E>,
 ) -> JsonString {
-    let is_ok = result.is_ok();
-    let inner_json: JsonString = match result {
-        Ok(inner) => inner.into(),
-        Err(inner) => inner.into(),
-    };
-    let inner_string = String::from(inner_json);
-    // JsonString::from_json_unchecked(&format!(
-    //     "{{\"{}\":{}}}",
-    //     if is_ok { "Ok" } else { "Err" },
-    //     inner_string
-    // ))
-    let k = if is_ok { "Ok" } else { "Err" };
-    JsonString::from_json_unchecked(&json!({ k: inner_string }).to_string())
+    // let is_ok = result.is_ok();
+    // let inner_json: JsonString = match result {
+    //     Ok(inner) => inner.into(),
+    //     Err(inner) => inner.into(),
+    // };
+    // let inner_string = String::from(inner_json);
+    // // JsonString::from_json_unchecked(&format!(
+    // //     "{{\"{}\":{}}}",
+    // //     if is_ok { "Ok" } else { "Err" },
+    // //     inner_string
+    // // ))
+    // let k = if is_ok { "Ok" } else { "Err" };
+    // JsonString::from_json_unchecked(&json!({ k: inner_string }).to_string())
+    match result {
+        Ok(v) => FakeResult::Ok(v.into()).into(),
+        Err(v) => FakeResult::Err(v.into()).into(),
+    }
 }
 
 impl<T, E> From<Result<T, E>> for JsonString
@@ -237,43 +248,61 @@ impl From<Result<String, String>> for JsonString {
 
 impl<T, E> TryInto<Result<T, E>> for JsonString
 where
-    T: Into<JsonString> + DeserializeOwned,
-    E: Into<JsonString> + DeserializeOwned,
+    T: 'static + Into<JsonString> + DeserializeOwned,
+    E: 'static + Into<JsonString> + DeserializeOwned,
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<T, E>, Self::Error> {
-        let outer: Result<JsonString, JsonString> = default_try_from_json(self)?;
+        let outer: FakeResult = self.try_into()?;
         match outer {
-            Ok(j) => Ok(Ok(default_try_from_json(j)?)),
-            Err(j) => Ok(Err(default_try_from_json(j)?)),
+            FakeResult::Ok(j) => {
+                if TypeId::of::<T>() == TypeId::of::<JsonString>() {
+                    Ok(Ok(default_try_from_json(JsonString::from(RawString::from(String::from(j))))?))
+                } else {
+                    Ok(Ok(default_try_from_json(j)?))
+                }
+            },
+            FakeResult::Err(j) => Ok(Err(default_try_from_json(j)?)),
         }
     }
 }
 
 impl<T> TryInto<Result<T, String>> for JsonString
 where
-    T: Into<JsonString> + DeserializeOwned,
+    T: 'static + Into<JsonString> + DeserializeOwned,
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<T, String>, Self::Error> {
-        let outer: Result<JsonString, JsonString> = default_try_from_json(self)?;
+        let outer: FakeResult = self.try_into()?;
         match outer {
-            Ok(j) => Ok(Ok(default_try_from_json(j)?)),
-            Err(j) => Ok(Err(default_try_from_json(j)?)),
+            FakeResult::Ok(j) => {
+                if TypeId::of::<T>() == TypeId::of::<JsonString>() {
+                    Ok(Ok(default_try_from_json(JsonString::from(RawString::from(String::from(j))))?))
+                } else {
+                    Ok(Ok(default_try_from_json(j)?))
+                }
+            },
+            FakeResult::Err(j) => Ok(Err(default_try_from_json(j)?)),
         }
     }
 }
 
 impl<E> TryInto<Result<String, E>> for JsonString
 where
-    E: Into<JsonString> + DeserializeOwned,
+    E: 'static + Into<JsonString> + DeserializeOwned,
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<String, E>, Self::Error> {
-        let outer: Result<JsonString, JsonString> = default_try_from_json(self)?;
+        let outer: FakeResult = self.try_into()?;
         match outer {
-            Ok(j) => Ok(Ok(default_try_from_json(j)?)),
-            Err(j) => Ok(Err(default_try_from_json(j)?)),
+            FakeResult::Ok(j) => Ok(Ok(default_try_from_json(j)?)),
+            FakeResult::Err(j) => {
+                if TypeId::of::<E>() == TypeId::of::<JsonString>() {
+                    Ok(Ok(default_try_from_json(JsonString::from(RawString::from(String::from(j))))?))
+                } else {
+                    Ok(Err(default_try_from_json(j)?))
+                }
+            },
         }
     }
 }
@@ -281,10 +310,10 @@ where
 impl TryInto<Result<String, String>> for JsonString {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<String, String>, Self::Error> {
-        let outer: Result<JsonString, JsonString> = default_try_from_json(self)?;
+        let outer: FakeResult = self.try_into()?;
         match outer {
-            Ok(j) => Ok(Ok(default_try_from_json(j)?)),
-            Err(j) => Ok(Err(default_try_from_json(j)?)),
+            FakeResult::Ok(j) => Ok(Ok(default_try_from_json(j)?)),
+            FakeResult::Err(j) => Ok(Err(default_try_from_json(j)?)),
         }
     }
 }
@@ -320,7 +349,7 @@ impl Display for JsonString {
 // `let s: Option<&str> = "hi".into()`
 // To get around this we need to go through an intermediate type JsonStringOption
 
-#[derive(Shrinkwrap, Deserialize)]
+#[derive(Shrinkwrap, Deserialize, Default)]
 pub struct JsonStringOption<T>(Option<T>);
 
 impl<T> JsonStringOption<T> {
@@ -410,7 +439,7 @@ pub trait DefaultJson:
 /// JsonString simply wraps String and str as-is but will Jsonify RawString("foo") as "\"foo\""
 /// RawString must not implement Serialize because it should always convert to JsonString with from
 /// RawString can implement Deserialize because JsonString uses default serde to step down
-#[derive(PartialEq, Debug, Clone, Deserialize)]
+#[derive(PartialEq, Debug, Clone, Deserialize, Default)]
 pub struct RawString(serde_json::Value);
 
 impl From<&'static str> for RawString {
@@ -537,7 +566,7 @@ pub mod tests {
 
         let result_restored: Result<String, JsonError> = expected.try_into().unwrap();
         assert_eq!(result, result_restored);
-
+        
         let result: Result<String, String> = Err(String::from("foo"));
         let expected = JsonString::from_json("{\"Err\":\"\\\"foo\\\"\"}").unwrap();
 
@@ -545,7 +574,7 @@ pub mod tests {
 
         let result_restored: Result<String, String> = expected.try_into().unwrap();
         assert_eq!(result, result_restored);
-        
+
         let result: Result<JsonString, String> = Ok(JsonString::from(RawString::from("foo")));
         let expected = JsonString::from_json("{\"Ok\":\"\\\"foo\\\"\"}").unwrap();
 
