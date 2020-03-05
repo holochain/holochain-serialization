@@ -144,7 +144,7 @@ mod tests {
     fn test_to_json() {
         let err = JsonError::new("foo");
         assert_eq!(
-            JsonString::from_json("{\"ErrorGeneric\":\"foo\"}"),
+            JsonString::from_json("{\"ErrorGeneric\":\"foo\"}").unwrap(),
             JsonString::from(err),
         );
     }

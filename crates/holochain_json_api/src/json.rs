@@ -24,28 +24,46 @@ impl JsonString {
     /// a null JSON value
     /// e.g. represents None when implementing From<Option<Foo>>
     pub fn null() -> JsonString {
-        JsonString::from_json("null")
+        JsonString::from_json_unchecked("null")
     }
 
     pub fn empty_object() -> JsonString {
-        JsonString::from_json("{}")
+        JsonString::from_json_unchecked("{}")
     }
 
     pub fn is_null(&self) -> bool {
         self == &Self::null()
     }
 
+    /// please avoid using this
+    /// use from_json() wherever possible as it checks the validity of the string as json which
+    /// helps save a lot of debugging time tracking down serialization mistakes
+    pub fn from_json_unchecked(s: &str) -> JsonString {
+        JsonString(s.to_owned())
+    }
+
     // Creates a JsonString from stringified json
     // replaces From<String> for JsonString and requires conversions to be explicit
     // This is because string types must be handled differently depending on if
     // they are strinfigied JSON or JSON strings
-    pub fn from_json(s: &str) -> JsonString {
+    pub fn from_json(s: &str) -> Result<JsonString, JsonError> {
         let cleaned = s
             // remove whitespace from both ends
             .trim()
             // remove null characters from both ends
             .trim_matches(char::from(0));
-        JsonString(cleaned.to_owned())
+
+        // https://users.rust-lang.org/t/serde-json-checking-syntax-of-json-file/16265/3
+        let _: serde::de::IgnoredAny = match serde_json::from_str(&cleaned) {
+            Err(e) => {
+                return Err(JsonError::SerializationError(format!(
+                    "Attempted to create JsonString from invalid JSON. String: {}. Error {}.",
+                    &cleaned, &e
+                )))
+            }
+            Ok(v) => v,
+        };
+        Ok(Self::from_json_unchecked(&cleaned.to_owned()))
     }
 
     /// achieves the same outcome as serde_json::to_vec()
@@ -53,8 +71,16 @@ impl JsonString {
         self.0.clone().into_bytes()
     }
 
-    pub fn from_bytes(bytes: Vec<u8>) -> Self {
-        Self::from_json(&String::from_utf8_lossy(&bytes))
+    pub fn from_bytes(bytes: Vec<u8>) -> Result<Self, JsonError> {
+        Self::from_json(&match std::str::from_utf8(&bytes) {
+            Ok(v) => v,
+            Err(_) => {
+                return Err(JsonError::SerializationError(format!(
+                    "Invalid UTF8 bytes found in JsonString {:?}",
+                    &bytes
+                )))
+            }
+        })
     }
 }
 
@@ -111,7 +137,7 @@ impl TryFrom<JsonString> for u64 {
 
 impl From<serde_json::Value> for JsonString {
     fn from(v: serde_json::Value) -> JsonString {
-        JsonString::from_json(&v.to_string())
+        JsonString::from_json_unchecked(&v.to_string())
     }
 }
 
@@ -133,15 +159,18 @@ impl<'a> From<&'a JsonString> for String {
     }
 }
 
-impl From<&'static str> for JsonString {
-    fn from(s: &str) -> JsonString {
+impl TryFrom<&'static str> for JsonString {
+    type Error = JsonError;
+    fn try_from(s: &str) -> Result<JsonString, JsonError> {
         JsonString::from_json(&String::from(s))
     }
 }
 
 impl<T: Serialize> From<Vec<T>> for JsonString {
     fn from(vector: Vec<T>) -> JsonString {
-        JsonString::from_json(&serde_json::to_string(&vector).expect("could not Jsonify vector"))
+        JsonString::from_json_unchecked(
+            &serde_json::to_string(&vector).expect("could not Jsonify vector"),
+        )
     }
 }
 
@@ -156,7 +185,7 @@ fn result_to_json_string<T: Into<JsonString>, E: Into<JsonString>>(
         Err(inner) => inner.into(),
     };
     let inner_string = String::from(inner_json);
-    JsonString::from_json(&format!(
+    JsonString::from_json_unchecked(&format!(
         "{{\"{}\":{}}}",
         if is_ok { "Ok" } else { "Err" },
         inner_string
@@ -335,7 +364,7 @@ impl From<Option<String>> for JsonString {
 /// }
 pub fn default_to_json<V: Serialize + Debug>(v: V) -> JsonString {
     serde_json::to_string(&v)
-        .map(|s| JsonString::from_json(&s))
+        .map(|s| JsonString::from_json_unchecked(&s))
         .map_err(|e| JsonError::SerializationError(e.to_string()))
         .unwrap_or_else(|_| panic!("could not Jsonify: {:?}", v))
 }
@@ -412,6 +441,7 @@ impl From<RawString> for JsonString {
             &serde_json::to_string(&raw_string.0)
                 .unwrap_or_else(|_| panic!("could not Jsonify RawString: {:?}", &raw_string)),
         )
+        .unwrap()
     }
 }
 
@@ -440,7 +470,7 @@ pub mod tests {
     #[test]
     fn default_json_round_trip_test() {
         let test = DeriveTest { foo: "bar".into() };
-        let expected = JsonString::from_json("{\"foo\":\"bar\"}");
+        let expected = JsonString::from_json("{\"foo\":\"bar\"}").unwrap();
         assert_eq!(expected, JsonString::from(test.clone()),);
 
         assert_eq!(&DeriveTest::try_from(expected).unwrap(), &test,);
@@ -467,7 +497,7 @@ pub mod tests {
         );
 
         assert_eq!(
-            JsonString::from_bytes(bytes_vec),
+            JsonString::from_bytes(bytes_vec).unwrap(),
             JsonString::from(RawString::from("foo")),
         );
     }
@@ -478,14 +508,14 @@ pub mod tests {
 
         assert_eq!(
             JsonString::from(result),
-            JsonString::from_json("{\"Err\":{\"ErrorGeneric\":\"foo\"}}"),
+            JsonString::from_json("{\"Err\":{\"ErrorGeneric\":\"foo\"}}").unwrap(),
         );
 
         let result: Result<String, String> = Err(String::from("foo"));
 
         assert_eq!(
             JsonString::from(result),
-            JsonString::from_json("{\"Err\":\"foo\"}"),
+            JsonString::from_json("{\"Err\":\"foo\"}").unwrap(),
         )
     }
 
@@ -499,7 +529,7 @@ pub mod tests {
 
         assert_eq!(
             String::from("\"foo\""),
-            String::from(JsonString::from_json(&String::from("\"foo\""))),
+            String::from(JsonString::from_json(&String::from("\"foo\"")).unwrap()),
         );
 
         assert_eq!(
@@ -551,7 +581,7 @@ pub mod tests {
     /// show From<JsonString> for RawString
     fn raw_from_json_test() {
         assert_eq!(
-            String::from(RawString::try_from(JsonString::from("\"foo\"")).unwrap()),
+            String::from(RawString::try_from(JsonString::try_from("\"foo\"").unwrap()).unwrap()),
             String::from("foo"),
         );
     }
@@ -567,7 +597,7 @@ pub mod tests {
 
     #[test]
     fn result_from_json_string() {
-        let j = JsonString::from_json(r#"{"Ok":"raw-string-content"}"#);
+        let j = JsonString::from_json(r#"{"Ok":"raw-string-content"}"#).unwrap();
         let r: Result<RawString, JsonError> = j
             .try_into()
             .expect("Could not convert json string to result type");
@@ -577,7 +607,7 @@ pub mod tests {
 
     #[test]
     fn result_from_json_string_with_strings() {
-        let j = JsonString::from_json(r#"{"Ok":"string-content"}"#);
+        let j = JsonString::from_json(r#"{"Ok":"string-content"}"#).unwrap();
         let r: Result<String, String> = j
             .try_into()
             .expect("Could not convert json string to result type");
@@ -589,29 +619,29 @@ pub mod tests {
     fn options_are_converted_to_null_or_value_respectively() {
         let o: Option<u32> = None;
         let j: JsonString = o.into();
-        assert_eq!(j, JsonString::from_json("null"));
+        assert_eq!(j, JsonString::from_json("null").unwrap());
 
         let o: Option<u32> = Some(10);
         let j: JsonString = o.into();
-        assert_eq!(j, JsonString::from_json("10"));
+        assert_eq!(j, JsonString::from_json("10").unwrap());
 
         let o: Option<String> = Some("test".to_string());
         let j: JsonString = o.into();
-        assert_eq!(j, JsonString::from_json("\"test\""));
+        assert_eq!(j, JsonString::from_json("\"test\"").unwrap());
     }
 
     #[test]
     fn json_string_to_option() {
-        let j = JsonString::from("10");
+        let j = JsonString::try_from("10").unwrap();
         let o: JsonStringOption<u32> = j.try_into().expect("failed conversion from JsonString");
         assert_eq!(o.to_option(), Some(10));
 
-        let j = JsonString::from("null");
+        let j = JsonString::try_from("null").unwrap();
         let o: JsonStringOption<u32> = j.try_into().expect("failed conversion from JsonString");
         assert_eq!(o.to_option(), None);
 
         // tricky!
-        let j = JsonString::from("\"null\"");
+        let j = JsonString::try_from("\"null\"").unwrap();
         let o: JsonStringOption<String> = j.try_into().expect("failed conversion from JsonString");
         assert_eq!(o.to_option(), Some("null".to_string()));
     }
