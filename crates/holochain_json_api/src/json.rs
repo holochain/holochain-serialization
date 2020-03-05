@@ -4,6 +4,7 @@
 use crate::error::{JsonError, JsonResult};
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json;
+use serde_json::json;
 use std::{
     convert::{TryFrom, TryInto},
     fmt::{Debug, Display, Formatter, Result as FmtResult},
@@ -185,11 +186,13 @@ fn result_to_json_string<T: Into<JsonString>, E: Into<JsonString>>(
         Err(inner) => inner.into(),
     };
     let inner_string = String::from(inner_json);
-    JsonString::from_json_unchecked(&format!(
-        "{{\"{}\":{}}}",
-        if is_ok { "Ok" } else { "Err" },
-        inner_string
-    ))
+    // JsonString::from_json_unchecked(&format!(
+    //     "{{\"{}\":{}}}",
+    //     if is_ok { "Ok" } else { "Err" },
+    //     inner_string
+    // ))
+    let k = if is_ok { "Ok" } else { "Err" };
+    JsonString::from_json_unchecked(&json!({ k: inner_string }).to_string())
 }
 
 impl<T, E> From<Result<T, E>> for JsonString
@@ -239,7 +242,11 @@ where
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<T, E>, Self::Error> {
-        default_try_from_json(self)
+        let outer: Result<JsonString, JsonString> = default_try_from_json(self)?;
+        match outer {
+            Ok(j) => Ok(Ok(default_try_from_json(j)?)),
+            Err(j) => Ok(Err(default_try_from_json(j)?)),
+        }
     }
 }
 
@@ -249,7 +256,11 @@ where
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<T, String>, Self::Error> {
-        default_try_from_json(self)
+        let outer: Result<JsonString, JsonString> = default_try_from_json(self)?;
+        match outer {
+            Ok(j) => Ok(Ok(default_try_from_json(j)?)),
+            Err(j) => Ok(Err(default_try_from_json(j)?)),
+        }
     }
 }
 
@@ -259,14 +270,22 @@ where
 {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<String, E>, Self::Error> {
-        default_try_from_json(self)
+        let outer: Result<JsonString, JsonString> = default_try_from_json(self)?;
+        match outer {
+            Ok(j) => Ok(Ok(default_try_from_json(j)?)),
+            Err(j) => Ok(Err(default_try_from_json(j)?)),
+        }
     }
 }
 
 impl TryInto<Result<String, String>> for JsonString {
     type Error = JsonError;
     fn try_into(self) -> Result<Result<String, String>, Self::Error> {
-        default_try_from_json(self)
+        let outer: Result<JsonString, JsonString> = default_try_from_json(self)?;
+        match outer {
+            Ok(j) => Ok(Ok(default_try_from_json(j)?)),
+            Err(j) => Ok(Err(default_try_from_json(j)?)),
+        }
     }
 }
 
@@ -511,18 +530,29 @@ pub mod tests {
     #[test]
     fn json_result_round_trip_test() {
         let result: Result<String, JsonError> = Err(JsonError::ErrorGeneric("foo".into()));
+        let expected =
+            JsonString::from_json("{\"Err\":\"{\\\"ErrorGeneric\\\":\\\"foo\\\"}\"}").unwrap();
 
-        assert_eq!(
-            JsonString::from(result),
-            JsonString::from_json("{\"Err\":{\"ErrorGeneric\":\"foo\"}}").unwrap(),
-        );
+        assert_eq!(JsonString::from(result.clone()), expected,);
+
+        let result_restored: Result<String, JsonError> = expected.try_into().unwrap();
+        assert_eq!(result, result_restored);
 
         let result: Result<String, String> = Err(String::from("foo"));
+        let expected = JsonString::from_json("{\"Err\":\"\\\"foo\\\"\"}").unwrap();
 
-        assert_eq!(
-            JsonString::from(result),
-            JsonString::from_json("{\"Err\":\"foo\"}").unwrap(),
-        )
+        assert_eq!(JsonString::from(result.clone()), expected,);
+
+        let result_restored: Result<String, String> = expected.try_into().unwrap();
+        assert_eq!(result, result_restored);
+        
+        let result: Result<JsonString, String> = Ok(JsonString::from(RawString::from("foo")));
+        let expected = JsonString::from_json("{\"Ok\":\"\\\"foo\\\"\"}").unwrap();
+
+        assert_eq!(JsonString::from(result.clone()), expected,);
+
+        let result_restored: Result<JsonString, String> = expected.try_into().unwrap();
+        assert_eq!(result, result_restored,);
     }
 
     #[test]
