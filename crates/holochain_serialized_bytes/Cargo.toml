@@ -14,4 +14,5 @@ repository = "https://github.com/holochain/holochain-serialization"
 serde = "=1.0.104"
 serde_derive = "=1.0.104"
 serde_json = { version = "=1.0.47", features = ["preserve_order"] }
-rmp-serde = "0.14.3"
+rmp-serde = "=0.14.3"
+serde-transcode = "=1.1.0"
