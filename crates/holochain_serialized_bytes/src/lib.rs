@@ -53,6 +53,16 @@ macro_rules! holochain_serial {
                 }
             }
 
+            impl std::convert::TryFrom<Option<$t>> for $crate::SerializedBytes {
+                type Error = $crate::SerializedBytesError;
+                fn try_from(t: Option<$t>) -> Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
+                    match $crate::rmp_serde::to_vec_named(&t) {
+                        Ok(v) => Ok($crate::SerializedBytes(v)),
+                        Err(e) => Err($crate::SerializedBytesError::ToBytes(e.to_string())),
+                    }
+                }
+            }
+
             impl<S: $crate::serde::Serialize> std::convert::TryFrom<Result<$t, S>> for $crate::SerializedBytes {
                 type Error = $crate::SerializedBytesError;
                 fn try_from(r: Result<$t, S>) -> Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
@@ -66,6 +76,16 @@ macro_rules! holochain_serial {
             impl std::convert::TryFrom<$crate::SerializedBytes> for $t {
                 type Error = $crate::SerializedBytesError;
                 fn try_from(sb: $crate::SerializedBytes) -> Result<$t, $crate::SerializedBytesError> {
+                    match $crate::rmp_serde::from_read_ref(&sb.0) {
+                        Ok(v) => Ok(v),
+                        Err(e) => Err($crate::SerializedBytesError::FromBytes(e.to_string())),
+                    }
+                }
+            }
+
+            impl std::convert::TryFrom<$crate::SerializedBytes> for Option<$t> {
+                type Error = $crate::SerializedBytesError;
+                fn try_from(sb: $crate::SerializedBytes) -> Result<Option<$t>, $crate::SerializedBytesError> {
                     match $crate::rmp_serde::from_read_ref(&sb.0) {
                         Ok(v) => Ok(v),
                         Err(e) => Err($crate::SerializedBytesError::FromBytes(e.to_string())),
@@ -179,6 +199,18 @@ pub mod tests {
             Result<Bar, Foo>,
             Err(fixture_foo()),
             vec![129, 1, 129, 165, 105, 110, 110, 101, 114, 163, 102, 111, 111]
+        );
+
+        do_test!(
+            Option<Foo>,
+            Some(fixture_foo()),
+            vec![129, 165, 105, 110, 110, 101, 114, 163, 102, 111, 111]
+        );
+
+        do_test!(
+            Option<Foo>,
+            None,
+            vec![192]
         );
     }
 
