@@ -128,7 +128,13 @@ pub mod tests {
         whatever: Vec<u8>,
     }
 
-    holochain_serial!(Foo, Bar);
+    /// struct with raw bytes in it
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    struct Baz {
+        wow: Option<Option<Result<Vec<u8>, Result<String, String>>>>,
+    }
+
+    holochain_serial!(Foo, Bar, Baz);
 
     fn fixture_foo() -> Foo {
         Foo {
@@ -210,6 +216,12 @@ pub mod tests {
         do_test!(
             Option<Foo>,
             None,
+            vec![192]
+        );
+
+        do_test!(
+            Option<Baz>,
+            Some(Baz{ wow: Some(Some(Ok(Err("foo".into())))) }),
             vec![192]
         );
     }
