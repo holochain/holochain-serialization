@@ -5,15 +5,6 @@ extern crate serde_derive;
 extern crate rmp_serde;
 extern crate serde_json;
 
-#[derive(Deserialize)]
-/// @TODO this is hacky
-/// i filed an upstream issue
-/// https://github.com/3Hren/msgpack-rust/issues/244
-enum FakeResult<T, E> {
-    Ok(T),
-    Err(E),
-}
-
 #[derive(Debug)]
 pub enum SerializedBytesError {
     /// somehow failed to move to bytes
@@ -53,26 +44,6 @@ macro_rules! holochain_serial {
                 }
             }
 
-            impl std::convert::TryFrom<Option<$t>> for $crate::SerializedBytes {
-                type Error = $crate::SerializedBytesError;
-                fn try_from(t: Option<$t>) -> Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
-                    match $crate::rmp_serde::to_vec_named(&t) {
-                        Ok(v) => Ok($crate::SerializedBytes(v)),
-                        Err(e) => Err($crate::SerializedBytesError::ToBytes(e.to_string())),
-                    }
-                }
-            }
-
-            impl<S: $crate::serde::Serialize> std::convert::TryFrom<Result<$t, S>> for $crate::SerializedBytes {
-                type Error = $crate::SerializedBytesError;
-                fn try_from(r: Result<$t, S>) -> Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
-                    match $crate::rmp_serde::to_vec_named(&r) {
-                        Ok(v) => Ok($crate::SerializedBytes(v)),
-                        Err(e) => Err($crate::SerializedBytesError::ToBytes(e.to_string())),
-                    }
-                }
-            }
-
             impl std::convert::TryFrom<$crate::SerializedBytes> for $t {
                 type Error = $crate::SerializedBytesError;
                 fn try_from(sb: $crate::SerializedBytes) -> Result<$t, $crate::SerializedBytesError> {
@@ -82,29 +53,6 @@ macro_rules! holochain_serial {
                     }
                 }
             }
-
-            impl std::convert::TryFrom<$crate::SerializedBytes> for Option<$t> {
-                type Error = $crate::SerializedBytesError;
-                fn try_from(sb: $crate::SerializedBytes) -> Result<Option<$t>, $crate::SerializedBytesError> {
-                    match $crate::rmp_serde::from_read_ref(&sb.0) {
-                        Ok(v) => Ok(v),
-                        Err(e) => Err($crate::SerializedBytesError::FromBytes(e.to_string())),
-                    }
-                }
-            }
-
-            impl<D: $crate::serde::de::DeserializeOwned> std::convert::TryFrom<$crate::SerializedBytes> for Result<$t, D> {
-                type Error = $crate::SerializedBytesError;
-                fn try_from(sb: $crate::SerializedBytes) -> Result<Result<$t, D>, $crate::SerializedBytesError> {
-                    match $crate::rmp_serde::from_read_ref(&sb.0) {
-                        Ok(FakeResult::Ok(v)) => Ok(Ok(v)),
-                        Ok(FakeResult::Err(e)) => Ok(Err(e)),
-                        Err(e) => Err($crate::SerializedBytesError::FromBytes(e.to_string())),
-                    }
-                }
-            }
-
-
         )*
 
     };
@@ -128,13 +76,22 @@ pub mod tests {
         whatever: Vec<u8>,
     }
 
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    enum BazResult {
+        Ok(Vec<u8>),
+        Err(String),
+    }
+
     /// struct with raw bytes in it
     #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
     struct Baz {
-        wow: Option<Option<Result<Vec<u8>, Result<String, String>>>>,
+        wow: Option<BazResult>
     }
 
-    holochain_serial!(Foo, Bar, Baz);
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    struct Tiny(u8);
+
+    holochain_serial!(Foo, Bar, Baz, Tiny);
 
     fn fixture_foo() -> Foo {
         Foo {
@@ -184,46 +141,17 @@ pub mod tests {
         );
 
         do_test!(
-            Result<Foo, Bar>,
-            Ok(fixture_foo()),
-            vec![129, 0, 129, 165, 105, 110, 110, 101, 114, 163, 102, 111, 111]
+            Baz,
+            Baz {
+                wow: Some(BazResult::Ok(vec![2, 5, 6]))
+            },
+            vec![129, 163, 119, 111, 119, 129, 0, 147, 2, 5, 6]
         );
 
         do_test!(
-            Result<Foo, Bar>,
-            Err(fixture_bar()),
-            vec![129, 1, 129, 168, 119, 104, 97, 116, 101, 118, 101, 114, 147, 1, 2, 3]
-        );
-
-        do_test!(
-            Result<Bar, Foo>,
-            Ok(fixture_bar()),
-            vec![129, 0, 129, 168, 119, 104, 97, 116, 101, 118, 101, 114, 147, 1, 2, 3]
-        );
-
-        do_test!(
-            Result<Bar, Foo>,
-            Err(fixture_foo()),
-            vec![129, 1, 129, 165, 105, 110, 110, 101, 114, 163, 102, 111, 111]
-        );
-
-        do_test!(
-            Option<Foo>,
-            Some(fixture_foo()),
-            vec![129, 165, 105, 110, 110, 101, 114, 163, 102, 111, 111]
-        );
-
-        do_test!(
-            Option<Foo>,
-            None,
-            vec![192]
-        );
-
-        do_test!(
-            Option<Baz>,
-            Some(Baz{ wow: Some(Some(Ok(Err("foo".into())))) }),
-            vec![192]
+            Tiny,
+            Tiny(5),
+            vec![5]
         );
     }
-
 }
