@@ -5,6 +5,15 @@ extern crate serde_derive;
 extern crate rmp_serde;
 extern crate serde_json;
 
+#[derive(Deserialize)]
+/// @TODO this is hacky
+/// i filed an upstream issue
+/// https://github.com/3Hren/msgpack-rust/issues/244
+enum FakeResult<T, E> {
+    Ok(T),
+    Err(E),
+}
+
 #[derive(Debug)]
 pub enum SerializedBytesError {
     /// somehow failed to move to bytes
@@ -15,6 +24,7 @@ pub enum SerializedBytesError {
     FromBytes(String),
 }
 
+#[derive(Clone, PartialEq, Eq)]
 pub struct SerializedBytes(Vec<u8>);
 
 impl std::fmt::Debug for SerializedBytes {
@@ -43,6 +53,16 @@ macro_rules! holochain_serial {
                 }
             }
 
+            impl<S: $crate::serde::Serialize> std::convert::TryFrom<Result<$t, S>> for $crate::SerializedBytes {
+                type Error = $crate::SerializedBytesError;
+                fn try_from(r: Result<$t, S>) -> Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
+                    match $crate::rmp_serde::to_vec_named(&r) {
+                        Ok(v) => Ok($crate::SerializedBytes(v)),
+                        Err(e) => Err($crate::SerializedBytesError::ToBytes(e.to_string())),
+                    }
+                }
+            }
+
             impl std::convert::TryFrom<$crate::SerializedBytes> for $t {
                 type Error = $crate::SerializedBytesError;
                 fn try_from(sb: $crate::SerializedBytes) -> Result<$t, $crate::SerializedBytesError> {
@@ -52,6 +72,19 @@ macro_rules! holochain_serial {
                     }
                 }
             }
+
+            impl<D: $crate::serde::de::DeserializeOwned> std::convert::TryFrom<$crate::SerializedBytes> for Result<$t, D> {
+                type Error = $crate::SerializedBytesError;
+                fn try_from(sb: $crate::SerializedBytes) -> Result<Result<$t, D>, $crate::SerializedBytesError> {
+                    match $crate::rmp_serde::from_read_ref(&sb.0) {
+                        Ok(FakeResult::Ok(v)) => Ok(Ok(v)),
+                        Ok(FakeResult::Err(e)) => Ok(Err(e)),
+                        Err(e) => Err($crate::SerializedBytesError::FromBytes(e.to_string())),
+                    }
+                }
+            }
+
+
         )*
 
     };
@@ -91,45 +124,62 @@ pub mod tests {
 
     #[test]
     fn round_trip() {
-        let sb_foo: SerializedBytes = fixture_foo().try_into().unwrap();
+        macro_rules! do_test {
+            ( $t:ty, $i:expr, $o:expr ) => {{
+                let i = $i;
+                let sb: SerializedBytes = i.clone().try_into().unwrap();
+                // this isn't for testing it just shows how the debug output looks
+                println!("{:?}", &sb);
 
-        assert_eq!(
-            &vec![129_u8, 165_u8, 105_u8, 110_u8, 110_u8, 101_u8, 114_u8, 163_u8, 102_u8, 111_u8, 111_u8],
-            &sb_foo.0,
-        );
+                assert_eq!(&$o, &sb.0,);
 
-        let returned_foo: Foo = sb_foo.try_into().unwrap();
+                let returned: $t = sb.try_into().unwrap();
 
-        assert_eq!(
-            returned_foo,
+                assert_eq!(returned, i);
+            }};
+        }
+
+        do_test!(
+            Foo,
             fixture_foo(),
+            vec![
+                129_u8, 165_u8, 105_u8, 110_u8, 110_u8, 101_u8, 114_u8, 163_u8, 102_u8, 111_u8,
+                111_u8,
+            ]
         );
 
-        let sb_bar: SerializedBytes = fixture_bar().try_into().unwrap();
-
-        assert_eq!(
-            &vec![129_u8, 168_u8, 119_u8, 104_u8, 97_u8, 116_u8, 101_u8, 118_u8, 101_u8, 114_u8, 147_u8, 1_u8, 2_u8, 3_u8],
-            &sb_bar.0,
-        );
-
-        let returned_bar: Bar = sb_bar.try_into().unwrap();
-
-        assert_eq!(
-            returned_bar,
+        do_test!(
+            Bar,
             fixture_bar(),
+            vec![
+                129_u8, 168_u8, 119_u8, 104_u8, 97_u8, 116_u8, 101_u8, 118_u8, 101_u8, 114_u8,
+                147_u8, 1_u8, 2_u8, 3_u8,
+            ]
+        );
+
+        do_test!(
+            Result<Foo, Bar>,
+            Ok(fixture_foo()),
+            vec![129, 0, 129, 165, 105, 110, 110, 101, 114, 163, 102, 111, 111]
+        );
+
+        do_test!(
+            Result<Foo, Bar>,
+            Err(fixture_bar()),
+            vec![129, 1, 129, 168, 119, 104, 97, 116, 101, 118, 101, 114, 147, 1, 2, 3]
+        );
+
+        do_test!(
+            Result<Bar, Foo>,
+            Ok(fixture_bar()),
+            vec![129, 0, 129, 168, 119, 104, 97, 116, 101, 118, 101, 114, 147, 1, 2, 3]
+        );
+
+        do_test!(
+            Result<Bar, Foo>,
+            Err(fixture_foo()),
+            vec![129, 1, 129, 165, 105, 110, 110, 101, 114, 163, 102, 111, 111]
         );
     }
 
-    #[test]
-
-    #[test]
-    /// this isn't a test really, it just prints out what comes from debug from SerializedBytes
-    /// it's just a visual thing for whoever is running the tests
-    fn debug() {
-        let sb_foo: SerializedBytes = fixture_foo().try_into().unwrap();
-        println!("{:?}", sb_foo);
-
-        let sb_bar: SerializedBytes = fixture_bar().try_into().unwrap();
-        println!("{:?}", sb_bar);
-    }
 }
