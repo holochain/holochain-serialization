@@ -6,7 +6,7 @@ Holochain has specific requirements for serialization that need to be enforced
 consistently in a "fool proof" way.
 
 - Support arbitrary binary data
-- Consistent bytes for cryptographic use
+- Consistent bytes for _canonical representations_ of things for cryptographic use
 - Support multiple languages
 - Wide industry usage and tooling across many languages including Rust
 - Reasonably fast and compact
