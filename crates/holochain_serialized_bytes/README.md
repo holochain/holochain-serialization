@@ -98,6 +98,31 @@ Any/all bugs from the rust messagepack implementation https://github.com/3Hren/m
 The `SerializedBytes` is intented to be immutable because it is a canonical
 representation of something else.
 
+### SerializedBytes TryFrom SerializedBytes is a no-op, nesting inside another struct double-serializes
+
+Moving from `SerializedBytes` to `SerializedBytes` is a no-op.
+
+Even though it is binary data that messagepack could represent as a nested binary
+message, it won't because Rust won't trigger the serialization logic.
+
+If you nest `SerializedBytes` inside another struct it WILL be double serialized.
+
+E.g. this (JSON representation):
+
+```
+// Foo { inner: String }
+// foo = Foo { inner: "foo".into() }
+{"inner":"foo"}
+```
+
+becomes this (JSON representation) when converted into `SerializedBytes` then nested in another struct:
+
+```
+// Bar { inner: SerializedBytes }
+// bar = Bar { inner: foo.into() }
+{"inner":[129,165,105,110,110,101,114,163,102,111,111]}
+```
+
 ### Semantic and shared types only
 
 We intentionally do not support moving from Rust primitives to/from `SerializedBytes`.
