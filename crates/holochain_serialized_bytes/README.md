@@ -75,7 +75,7 @@ let deserialized_foo: Foo = serialized_bytes.try_into().unwrap();
 ## Debugging
 
 For debugging, the internal messagepack serialized bytes are transcoded to JSON
-using `serde-transcode`. This means that you will see JSON output from `{:?}"
+using `serde-transcode`. This means that you will see JSON output from `"{:?}"`
 which is much easier to read than binary from messagepack.
 
 If you want a read only view of the actual messagepack bytes call the `.bytes()` method.
