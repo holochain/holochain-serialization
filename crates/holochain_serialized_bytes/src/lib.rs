@@ -15,8 +15,35 @@ pub enum SerializedBytesError {
     FromBytes(String),
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone)]
+pub struct UnsafeBytes(Vec<u8>);
+
+impl From<Vec<u8>> for UnsafeBytes {
+    fn from(v: Vec<u8>) -> Self {
+        Self(v)
+    }
+}
+
+impl From<UnsafeBytes> for SerializedBytes {
+    fn from(b: UnsafeBytes) -> Self {
+        SerializedBytes(b.0)
+    }
+}
+
+impl From<SerializedBytes> for UnsafeBytes {
+    fn from(sb: SerializedBytes) -> Self {
+        UnsafeBytes(sb.0)
+    }
+}
+
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SerializedBytes(Vec<u8>);
+
+impl SerializedBytes {
+    pub fn bytes(&self) -> &Vec<u8> {
+        &self.0
+    }
+}
 
 impl std::fmt::Debug for SerializedBytes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -93,7 +120,15 @@ pub mod tests {
     #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
     struct Tiny(u8);
 
-    holochain_serial!(Foo, Bar, Baz, Tiny);
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    struct SomeBytes(Vec<u8>);
+
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    struct IncludesSerializedBytes {
+        inner: SerializedBytes
+    }
+
+    holochain_serial!(Foo, Bar, Baz, Tiny, SomeBytes, IncludesSerializedBytes);
 
     fn fixture_foo() -> Foo {
         Foo {
@@ -116,7 +151,7 @@ pub mod tests {
                 // this isn't for testing it just shows how the debug output looks
                 println!("{:?}", &sb);
 
-                assert_eq!(&$o, &sb.0,);
+                assert_eq!(&$o, sb.bytes(),);
 
                 let returned: $t = sb.try_into().unwrap();
 
@@ -157,9 +192,54 @@ pub mod tests {
         );
 
         do_test!(
+            SomeBytes,
+            SomeBytes(vec![1_u8, 90_u8, 155_u8]),
+            vec![147, 1, 90, 204, 155]
+        );
+
+        do_test!(
             (),
             (),
             vec![192]
+        );
+
+        do_test!(
+            IncludesSerializedBytes,
+            IncludesSerializedBytes {
+                inner: fixture_foo().try_into().unwrap()
+            },
+            vec![129, 165, 105, 110, 110, 101, 114, 155, 204, 129, 204, 165, 105, 110, 110, 101, 114, 204, 163, 102, 111, 111]
+        );
+    }
+
+    #[test]
+    fn self_noop() {
+        let sb: SerializedBytes = fixture_foo().try_into().unwrap();
+
+        let sb_2: SerializedBytes = sb.clone().try_into().unwrap();
+
+        assert_eq!(
+            sb,
+            sb_2,
+        );
+    }
+
+    #[test]
+    fn provide_own_bytes() {
+        let bytes = vec![1_u8, 90_u8, 155_u8];
+        let own_bytes = UnsafeBytes::from(bytes.clone());
+        let sb: SerializedBytes = own_bytes.clone().into();
+
+        assert_eq!(
+            sb.bytes(),
+            &bytes,
+        );
+
+        let own_bytes_restored: UnsafeBytes = sb.into();
+
+        assert_eq!(
+            &own_bytes.0,
+            &own_bytes_restored.0,
         );
     }
 }
