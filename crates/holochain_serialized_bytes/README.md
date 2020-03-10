@@ -15,7 +15,6 @@ consistently in a "fool proof" way.
 - Able to derive a sane serialization for the 99% of use cases
 - Able to manually implement serialization for edge-cases (e.g. Merkle Trees)
 - Able to be form a base infrastructure layer for both wasm and networking
-- Works in wasm
 
 ## How
 
