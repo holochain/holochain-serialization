@@ -268,9 +268,9 @@ Which led to serious issues:
 - Sometimes `foo` didn't contain valid JSON data at all, but `from_json()` still accepted it (or users would have to eat runtime CPU costs to validate and potentially error)
 - Having `JsonString::from` and `JsonString::from_json` and `RawString` just muddied the waters with subtleties that maybe a half dozen people ever understood or cared about
 - There was no guarantee that `foo` would always contain the same bytes even if the serialized data was equivalent (e.g. whitespace, field ordering, etc.) so this breaks cryptography
-- It's not immediately obvious what the "correct" behaviour of nested `JsonString` structs should be (e.g. no-op vs. double serialize)
+- It's not immediately obvious what the "correct" behaviour of nested `JsonString` structs should be (e.g. no-op vs. double serialize) as ad-hoc data never has structural boundaries in the first place
 - There's no canonical way to round-trip data if it never had a canonical type/form in the first place
-- It's impossible to modify the serialization approach later without heroic efforts (vs. simply updating the `holochain_serial!` macro in this crate)
+- It's impossible to modify the serialization approach later (e.g. moving to messagepack) without heroic efforts (vs. simply updating the `holochain_serial!` macro in this crate)
 
 I do understand that for some use-cases, (e.g. merkle trees), you may need exact bytes (i.e. not messagepack).
 
