@@ -58,6 +58,8 @@ macro_rules! holochain_serial {
     };
 }
 
+holochain_serial!(());
+
 #[cfg(test)]
 pub mod tests {
 
@@ -152,6 +154,12 @@ pub mod tests {
             Tiny,
             Tiny(5),
             vec![5]
+        );
+
+        do_test!(
+            (),
+            (),
+            vec![192]
         );
     }
 }
