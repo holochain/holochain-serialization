@@ -128,6 +128,7 @@ pub mod tests {
         inner: SerializedBytes
     }
 
+    // register all our types for messagepack implementations
     holochain_serial!(Foo, Bar, Baz, Tiny, SomeBytes, IncludesSerializedBytes);
 
     fn fixture_foo() -> Foo {

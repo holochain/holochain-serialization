@@ -25,7 +25,7 @@ type information across systems (e.g. across wasm guest/host boundary).
 
 A single `SerializedBytes` new type that includes a `Vec<u8>` of bytes.
 
-These bytes are expected to be MessagePack serialized binary data.
+These bytes are by default to be MessagePack serialized binary data.
 
 https://msgpack.org/
 
@@ -42,6 +42,34 @@ https://github.com/3Hren/msgpack-rust
 Definitely use `holochain_serial!` for all your types if you can.
 
 You also need to derive or implement `Serialize` and `Deserialize` for your types.
+
+It looks like this:
+
+```rust
+/// struct with a utf8 string in it
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+struct Foo {
+    inner: String,
+}
+
+/// struct with raw bytes in it
+#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+struct Bar {
+    whatever: Vec<u8>,
+}
+
+/// register our types for messagepack implementation
+holochain_serial!(Foo, Bar);
+
+let foo = Foo { inner: "foo".into() };
+
+let serialized_bytes: SerializedBytes = foo.try_into().unwrap();
+
+println!("{:?}", &serialized_bytes); // debugs to json: {"inner":"foo"}
+println!("{:?}", serialized_bytes.bytes()); // messagepack bytes [129_u8, 165_u8, 105_u8, 110_u8, 110_u8, 101_u8, 114_u8, 163_u8, 102_u8, 111_u8, 111_u8,]
+
+let deserialized_foo: Foo = serialized_bytes.try_into().unwrap();
+```
 
 ## Debugging
 
