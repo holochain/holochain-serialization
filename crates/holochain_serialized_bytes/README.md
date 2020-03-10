@@ -171,6 +171,19 @@ compiler types, e.g. when "1" exists in some serialized format it could be signe
 or unsigned of any size, whereas rust treats `u8` and `i8` and `u32` as completely
 different things.
 
+In addition to these issues on the philosophical/domain-modelling side of things
+it is also _really_ messy to "correctly" handle primitives the way we want.
+Rust hasn't implemented "type specialization" yet, which makes handling things
+like `Result<Result<SerializedBytes, String>, String>` lead to hundreds of lines
+of (still buggy) code. See the legacy `JsonString` implementation and issues for
+examples of how edge-cases in the type system can  introduce subtle bugs that
+break serialization round-trips.
+
+The current setup that avoids primatives does the heavy lifting in under 50 LOC.
+
+- specialization RFC: https://github.com/rust-lang/rust/issues/31844
+- example messy code: https://github.com/holochain/holochain-serialization/pull/15/files#diff-634e1fc4ddb3416a36776dac7cfaa965R187
+
 **Important note:** all of these types, including `Result` and `Option` and even
 `SerializedBytes`itself, all implement both `Serialize` and `Deserialize` which
 means they can be used _within_ your custom struct/enum type, but please be mindful
