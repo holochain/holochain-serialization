@@ -128,7 +128,7 @@ can cross multiple nested function calls that can hit other arbitrary systems,
 that all represent their data like the above...
 
 Very quickly we end up with something the compiler can't help with because it is
-all essentially "stringly typed" and those strings contain several elder backslashes.
+all essentially "stringly typed" full of backslashes to escape it all.
 
 https://www.xkcd.com/1638/
 
@@ -315,6 +315,8 @@ We used JSON for a long time. It certainly has many benefits:
 Ultimately though, JSON is not a binary format and a lot of people want a binary format.
 
 Forcing everything through UTF-8 introduces messy base64 encoding etc. that leads to overhead and mistakes.
+
+JSON format also suffers the need for complex escaping (backslashes) that is hard to debug by hand.
 
 ### Why not BSON or similar?
 
