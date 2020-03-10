@@ -365,7 +365,8 @@ We used JSON for a long time. It certainly has many benefits:
 
 Ultimately though, JSON is not a binary format and a lot of people want a binary format.
 
-Forcing everything through UTF-8 introduces messy base64 encoding etc. that leads to overhead and mistakes.
+Forcing everything through verbose UTF-8 introduces messy base64 encoding, gzipping etc.
+that leads to overhead and mistakes.
 
 JSON format also suffers the need for complex escaping (backslashes) that is hard to debug by hand.
 
