@@ -195,7 +195,10 @@ of contexts, including security sensitive ones.
 Numbers have problems where the serialization format doesn't map 1:1 with the
 compiler types, e.g. when "1" exists in some serialized format it could be signed
 or unsigned of any size, whereas rust treats `u8` and `i8` and `u32` as completely
-different things.
+different things. This is more or less of an issue depending on where you sit on
+the scale between serialzation formats that are tightly coupled to the language
+you are currently using vs. general purpose formats that can't assume anything
+about language support.
 
 In addition to these issues on the philosophical/domain-modelling side of things
 it is also _really_ messy to "correctly" handle primitives the way we want.
