@@ -132,12 +132,10 @@ all essentially "stringly typed" full of backslashes to escape it all.
 
 https://www.xkcd.com/1638/
 
-The thing is that things like `Option` and `Result` aren't representation of domain
-specific data, they are conceits of compiler type systems. They don't need to be
-serialized because the type information needs to be given to the compiler for it
-to be able to deserialize anyway...
-
-Good watching on the topic:
+Things like `Option` and `Result` aren't representation of domain specific data
+anyway, they are conceits of compiler type systems. They don't need to be
+serialized because the type information needs to be given to the compiler by the
+developer for rust to be able to deserialize anyway.
 
 https://www.youtube.com/watch?v=YR5WdGrpoug&feature=youtu.be
 
@@ -154,6 +152,11 @@ that is worth serializing, it feeds into cryptographically signed claims about
 the validity of other things according to a set of rules, so the serialized
 representation feeds into a cryptographic proof, which can't be said about a
 generic Rust `Result` that simply means "some function may fail".
+
+The closest we get to "needing" a `Result` is to represent the return value of
+imported/exported functions between a wasm host/guest, but even this would work
+and could even benefit from `WasmHostResult` and `WasmGuestResult` enums to
+track the provenence of any errors.
 
 Other primitives like strings and integers are also NOT supported to directly
 move between `SerializedBytes` and this is by design.
