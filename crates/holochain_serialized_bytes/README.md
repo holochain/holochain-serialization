@@ -312,6 +312,7 @@ Which led to serious issues:
 - There was no guarantee that `foo` would always contain the same bytes even if the serialized data was equivalent (e.g. whitespace, field ordering, etc.) so this breaks cryptography
 - It's not immediately obvious what the "correct" behaviour of nested `JsonString` structs should be (e.g. no-op vs. double serialize) as ad-hoc data never has structural boundaries in the first place
 - There's no canonical way to round-trip data if it never had a canonical type/form in the first place
+- Wherever the lack of canonical round-tripping (or potential for) touched the wasm host/guest boundary, the `JsonString` abstraction leaked out of the HDK into a happ level concern
 - It's impossible to modify the serialization approach later (e.g. moving to messagepack) without heroic efforts (vs. simply updating the `holochain_serial!` macro in this crate)
 
 I do understand that for some use-cases, (e.g. merkle trees), you may need exact bytes (i.e. not messagepack).
