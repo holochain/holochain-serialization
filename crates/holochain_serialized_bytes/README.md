@@ -276,7 +276,7 @@ I do understand that for some use-cases, (e.g. merkle trees), you may need exact
 
 There is an escape hatch for directly importing `u8` bytes into `SerializedBytes`.
 
-The above issues have already burned hundreds of development hours, with 105 uses of `from_json()` across 48 files, so please avoid it!
+The above issues have already burned hundreds of development hours, with 105 outstanding uses of `from_json()` across 48 files, so please avoid it!
 
 To move bytes into `SerializedBytes` use the `UnsafeBytes` struct.
 
@@ -299,6 +299,11 @@ impl TryFrom<Foo> for SerializedBytes {
 ```
 
 This allows us to maintain the rule that we always use `TryFrom` to round trip `Foo` through `SerializedBytes`.
+Among other things this rule allows us to write proc macros that completely hide the
+`SerializedBytes` struct from the end-user-happ-developer.
+If our HDK can safely assume the existence of `TryFrom<SerializedBytes>` for _everything_
+that crosses the wasm boundary we can achieve an "almost native"
+(sans-primitive types, see above) working experience for typed zome functions.
 
 __Important note:__ If you use `UnsafeBytes` the expectation is that you are NOT using messagepack any more.
 Therefore, if we move away from messagepack (e.g. to BSON or something) then don't expect any compatibility with `UnsafeBytes` based code.
