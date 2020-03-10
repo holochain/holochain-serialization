@@ -48,13 +48,13 @@ It looks like this:
 
 ```rust
 /// struct with a utf8 string in it
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize)]
 struct Foo {
     inner: String,
 }
 
 /// struct with raw bytes in it
-#[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+#[derive(Serialize, Deserialize)]
 struct Bar {
     whatever: Vec<u8>,
 }
