@@ -4,7 +4,7 @@ let
 
  script = pkgs.writeShellScriptBin name ''
 echo "bumping holochain_json_derive dependency versions to ${config.release.version.current} in all Cargo.toml"
-for $crate in holochain_json_derive holochain_serialized_bytes
+for crate in holochain_json_derive holochain_serialized_bytes
 do
  find . \
   -name "Cargo.toml" \
