@@ -4,12 +4,15 @@ let
 
  script = pkgs.writeShellScriptBin name ''
 echo "bumping holochain_json_derive dependency versions to ${config.release.version.current} in all Cargo.toml"
-find . \
- -name "Cargo.toml" \
- -not -path "**/target/**" \
- -not -path "**/.git/**" \
- -not -path "**/.cargo/**" | xargs -I {} \
- sed -i 's/^holochain_json_derive = { version = "=[0-9]\+.[0-9]\+.[0-9]\+\(-alpha[0-9]\+\)\?"/holochain_json_derive = { version = "=${config.release.version.current}"/g' {}
+for $crate in holochain_json_derive holochain_serialized_bytes
+do
+ find . \
+  -name "Cargo.toml" \
+  -not -path "**/target/**" \
+  -not -path "**/.git/**" \
+  -not -path "**/.cargo/**" | xargs -I {} \
+  sed -i 's/^''${crate} = { version = "=[0-9]\+.[0-9]\+.[0-9]\+\(-alpha[0-9]\+\)\?"/''${crate} = { version = "=${config.release.version.current}"/g' {}
+done
 '';
 in
 {
