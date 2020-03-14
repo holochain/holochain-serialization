@@ -1,13 +1,11 @@
-extern crate serde;
-#[allow(unused_imports)]
-#[macro_use]
-extern crate serde_derive;
+pub extern crate serde;
 extern crate serde_json;
 
 extern crate rmp_serde;
 
 pub use rmp_serde::from_read_ref;
 pub use rmp_serde::to_vec_named;
+use serde::{Deserialize, Serialize};
 
 pub mod prelude;
 
@@ -194,7 +192,7 @@ holochain_serial!(());
 #[cfg(test)]
 pub mod tests {
 
-    use super::*;
+    use super::prelude::*;
     use std::convert::TryInto;
 
     /// struct with a utf8 string in it
