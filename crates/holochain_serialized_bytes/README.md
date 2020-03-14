@@ -39,7 +39,7 @@ These bytes are by default to be MessagePack serialized binary data.
 
 https://msgpack.org/
 
-There is no way to construct it e.g. there is no `SerializedBytes::new()`.
+There is constructor for it e.g. there is no `SerializedBytes::new()`.
 
 Implement `TryFrom<SerializedBytes> for Foo` and `TryFrom<Foo> for SerializedBytes`.
 
@@ -201,6 +201,7 @@ context that produced it is mostly useless in a different compilation context.
 This is especially true for strings when serialized data is also a string,
 forgetting to serialize or double serializing strings is a huge problem in lots
 of contexts, including security sensitive ones.
+
 Numbers have problems where the serialization format doesn't map 1:1 with the
 compiler types, e.g. when "1" exists in some serialized format it could be signed
 or unsigned of any size, whereas rust treats `u8` and `i8` and `u32` as completely
@@ -239,18 +240,18 @@ may add some overhead.
 - Make thoughtful use of the New Type idiom https://doc.rust-lang.org/rust-by-example/generics/new_types.html to serialize primitives
 - Be mindful that serialized data should be domain specific "stuff" (what a thing is) not meta/logic level stuff
 
-#### DONTs
+#### DON'Ts
 
 - Put things in shared type crates that will bloat or break wasm code
 - Do weird nested things with `Result` and `Option` to try and avoid the above
-- Avoid nesting `SerializedBytes` in other things unless you really mean to serialize already-serialized data
+- Nest `SerializedBytes` in other things unless you really mean to serialize already-serialized data
 
 ### Still need to implement/derive Serialize and Deserialize
 
 For any struct/enum you want to move into `SerializedBytes` you need to add the
 two basic Serde traits. We can't magic this boilerplate away with macros (yet).
 
-Rust guidelanes state to impl `Serialize` and `Deserialize` anyway.
+Rust guidelines state to impl `Serialize` and `Deserialize` anyway.
 
 https://rust-lang.github.io/api-guidelines/interoperability.html#data-structures-implement-serdes-serialize-deserialize-c-serde
 
@@ -260,8 +261,7 @@ I chose to implement `holochain_serial!(FooType, BarType, ...)` as a proc macro 
 
 I think this is a little non-standard but has a few advantages around dependency management and overall boilerplate.
 
-Derive macros require a separate `*_derive` crate, which means I can't do `$crate::SerializedBytes` which means I
-can't lock down fully qualified paths to things, which introduces room for mistakes and additional
+Derive macros require a separate `*_derive` crate, which means I can't do `$crate::SerializedBytes` which means I can't lock down fully qualified paths to things, which introduces room for mistakes and additional
 boilerplate/maintenance of dependencies.
 
 Even if we re-export the macro from the derive crate in the main crate, there would be
@@ -391,7 +391,7 @@ And the crate is tied to mongodb c.f. messagepack being more broadly owned/starr
 
 If there is a strong pull for BSON we could swap out or augment `holochain_serial!` fairly easily.
 
-### Why not some Rust-coupled format?
+### Why not some Rust-coupled format (like bincode)?
 
 Using something tied to Rust has technical benefits:
 
