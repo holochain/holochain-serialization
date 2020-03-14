@@ -6,8 +6,8 @@ extern crate serde_json;
 
 extern crate rmp_serde;
 
-pub use ::rmp_serde::to_vec_named;
-pub use ::rmp_serde::from_read_ref;
+pub use rmp_serde::from_read_ref;
+pub use rmp_serde::to_vec_named;
 
 pub mod prelude;
 
@@ -218,7 +218,7 @@ pub mod tests {
     /// struct with raw bytes in it
     #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
     struct Baz {
-        wow: Option<BazResult>
+        wow: Option<BazResult>,
     }
 
     #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
@@ -229,7 +229,7 @@ pub mod tests {
 
     #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
     struct IncludesSerializedBytes {
-        inner: SerializedBytes
+        inner: SerializedBytes,
     }
 
     // register all our types for messagepack implementations
@@ -290,11 +290,7 @@ pub mod tests {
             vec![129, 163, 119, 111, 119, 129, 0, 147, 2, 5, 6]
         );
 
-        do_test!(
-            Tiny,
-            Tiny(5),
-            vec![5]
-        );
+        do_test!(Tiny, Tiny(5), vec![5]);
 
         do_test!(
             SomeBytes,
@@ -302,18 +298,17 @@ pub mod tests {
             vec![147, 1, 90, 204, 155]
         );
 
-        do_test!(
-            (),
-            (),
-            vec![192]
-        );
+        do_test!((), (), vec![192]);
 
         do_test!(
             IncludesSerializedBytes,
             IncludesSerializedBytes {
                 inner: fixture_foo().try_into().unwrap()
             },
-            vec![129, 165, 105, 110, 110, 101, 114, 155, 204, 129, 204, 165, 105, 110, 110, 101, 114, 204, 163, 102, 111, 111]
+            vec![
+                129, 165, 105, 110, 110, 101, 114, 155, 204, 129, 204, 165, 105, 110, 110, 101,
+                114, 204, 163, 102, 111, 111
+            ]
         );
     }
 
@@ -323,10 +318,7 @@ pub mod tests {
 
         let sb_2: SerializedBytes = sb.clone().try_into().unwrap();
 
-        assert_eq!(
-            sb,
-            sb_2,
-        );
+        assert_eq!(sb, sb_2,);
     }
 
     #[test]
@@ -335,16 +327,10 @@ pub mod tests {
         let own_bytes = UnsafeBytes::from(bytes.clone());
         let sb: SerializedBytes = own_bytes.clone().into();
 
-        assert_eq!(
-            sb.bytes(),
-            &bytes,
-        );
+        assert_eq!(sb.bytes(), &bytes,);
 
         let own_bytes_restored: UnsafeBytes = sb.into();
 
-        assert_eq!(
-            &own_bytes.0,
-            &own_bytes_restored.0,
-        );
+        assert_eq!(&own_bytes.0, &own_bytes_restored.0,);
     }
 }

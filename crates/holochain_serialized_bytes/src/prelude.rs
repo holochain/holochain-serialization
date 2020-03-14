@@ -1,6 +1,6 @@
+pub use serde_derive::Deserialize;
 /// allow downstream consumers to not manage their own deps on serde
-pub use ::serde_derive::Serialize;
-pub use ::serde_derive::Deserialize;
+pub use serde_derive::Serialize;
 
 /// allow downstream consumers to forget to pull in basic try_from/try_into methods
 pub use std::convert::TryFrom;
