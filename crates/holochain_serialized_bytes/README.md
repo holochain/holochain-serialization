@@ -17,6 +17,15 @@ consistently in a "fool proof" way.
 - Able to be form a base infrastructure layer for both wasm and networking
 - Able to leverage the Rust compiler as much as possible to avoid bugs and help refactors
 
+There are some additional goals of this crate that I'd like to make explicit
+that informed some of the code design choices.
+
+- Canonical representations of bytes of data should be enforced as canonical by the compiler at the type level
+- For two systems sharing bytes and a shared type crate on the same version, round tripping bytes should be guaranteed safe by the compiler
+- The design of `SerializedBytes` should be such that end-user-happ-devs should not need to be aware of it for BAU tasks
+- Internal dependencies (e.g. serde messagepack handling) of this crate should not bleed into downstream concerns due to macros or whatever
+- Everything internal to serialization should be upgradeable and refactorable without any external interface changes for consumers
+
 ## How
 
 The usage is very simple. Most of this README is dedicated to discussing design
