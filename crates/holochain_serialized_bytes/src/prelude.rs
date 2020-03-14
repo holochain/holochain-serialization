@@ -8,4 +8,5 @@ pub use std::convert::TryInto;
 /// this is everything downstream consumers need from this crate
 pub use crate::holochain_serial;
 pub use crate::SerializedBytes;
+pub use crate::SerializedBytesError;
 pub use crate::UnsafeBytes;

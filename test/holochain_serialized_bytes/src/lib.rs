@@ -13,6 +13,17 @@ pub mod tests {
         inner: String,
     }
 
+    enum FooError {
+        Serialize,
+    }
+
+    // SerializedBytesError handled by prelude
+    impl From<SerializedBytesError> for FooError {
+        fn from(_: SerializedBytesError) -> Self {
+            FooError::Serialize
+        }
+    }
+
     // holochain_serial! in prelude
     holochain_serial!(Foo);
 
