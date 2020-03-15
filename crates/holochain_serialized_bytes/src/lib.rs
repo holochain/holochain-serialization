@@ -19,6 +19,12 @@ pub enum SerializedBytesError {
     FromBytes(String),
 }
 
+impl From<SerializedBytesError> for String {
+    fn from(sb: SerializedBytesError) -> Self {
+        format!("{:?}", sb)
+    }
+}
+
 #[derive(Clone)]
 /// UnsafeBytes the only way to implement a custom round trip through bytes for SerializedBytes
 /// It is intended to be an internal implementation in TryFrom implementations
