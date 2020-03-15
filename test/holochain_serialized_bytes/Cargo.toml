@@ -1,6 +1,6 @@
 [package]
 name = "test_holochain_serialized_bytes"
-version = "0.0.28"
+version = "0.0.29"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 description = "test serialized bytes for holochain"
 keywords = ["holochain", "holo", "messagepack", "json", "serialization"]
