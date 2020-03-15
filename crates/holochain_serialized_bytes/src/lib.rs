@@ -39,6 +39,12 @@ impl From<Vec<u8>> for UnsafeBytes {
     }
 }
 
+impl From<UnsafeBytes> for Vec<u8> {
+    fn from(unsafe_bytes: UnsafeBytes) -> Vec<u8> {
+        unsafe_bytes.0
+    }
+}
+
 impl From<UnsafeBytes> for SerializedBytes {
     fn from(b: UnsafeBytes) -> Self {
         SerializedBytes(b.0)
