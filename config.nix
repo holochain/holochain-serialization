@@ -48,7 +48,7 @@ hn-release-hook-preflight-manual
    # bump versions in the repo
    version = ''
 hn-release-hook-version-rust
-hcs-release-hook-version
+hn-release-hook-version-rust-deps 'holochain_json_derive holochain_serialized_bytes'
 '';
 
    # publish artifacts to the world
