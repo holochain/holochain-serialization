@@ -60,13 +60,13 @@ hn-release-hook-version-rust-deps 'holochain_json_derive holochain_serialized_by
   # the commit hash that the release process should target
   # this will always be behind what ends up being deployed
   # the release process needs to add some commits for changelog etc.
-  commit = "d92dc7580b9de87f6c94a8564d9299628b9ab6cb";
+  commit = "8e312775cc318518e76490441fecde76c1f6768c";
 
   # the semver for prev and current releases
   # the previous version will be scanned/bumped by release scripts
   # the current version is what the release scripts bump *to*
   version = {
-   current = "0.0.31";
+   current = "0.0.32";
    # not used by version hooks in this repo
    previous = "_._._";
   };
