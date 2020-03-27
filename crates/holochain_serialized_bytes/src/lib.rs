@@ -9,7 +9,7 @@ use serde::{Deserialize, Serialize};
 
 pub mod prelude;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum SerializedBytesError {
     /// somehow failed to move to bytes
     /// most likely hit a messagepack limit https://github.com/msgpack/msgpack/blob/master/spec.md#limitation
@@ -18,6 +18,14 @@ pub enum SerializedBytesError {
     /// i mean, this could be anything, how do i know what's wrong with your bytes?
     FromBytes(String),
 }
+
+impl std::fmt::Display for SerializedBytesError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
+}
+
+impl std::error::Error for SerializedBytesError {}
 
 impl From<SerializedBytesError> for String {
     fn from(sb: SerializedBytesError) -> Self {

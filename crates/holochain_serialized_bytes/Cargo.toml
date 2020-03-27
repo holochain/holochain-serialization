@@ -13,6 +13,6 @@ edition = "2018"
 
 [dependencies]
 serde = { version = "=1.0.104", features = ["serde_derive"] }
-serde_json = { version = "=1.0.47", features = ["preserve_order"] }
+serde_json = { version = "=1.0.48", features = ["preserve_order"] }
 rmp-serde = "=0.14.3"
 serde-transcode = "=1.1.0"

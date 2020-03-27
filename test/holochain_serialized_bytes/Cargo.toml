@@ -11,5 +11,5 @@ documentation = "https://docs.rs/holochain_serialized_bytes"
 repository = "https://github.com/holochain/holochain-serialization"
 
 [dependencies]
-holochain_serialized_bytes = { version = "=0.0.29", path = "../../crates/holochain_serialized_bytes" }
+holochain_serialized_bytes = { version = "=0.0.30", path = "../../crates/holochain_serialized_bytes" }
 serde = "=1.0.104"
