@@ -6,6 +6,7 @@ extern crate rmp_serde;
 pub use rmp_serde::from_read_ref;
 pub use rmp_serde::to_vec_named;
 use serde::{Deserialize, Serialize};
+use std::convert::TryFrom;
 
 pub mod prelude;
 
@@ -216,6 +217,12 @@ macro_rules! holochain_serial {
 
 holochain_serial!(());
 
+impl Default for SerializedBytes {
+    fn default() -> Self {
+        SerializedBytes::try_from(()).unwrap()
+    }
+}
+
 #[cfg(test)]
 pub mod tests {
 
@@ -359,5 +366,10 @@ pub mod tests {
         let own_bytes_restored: UnsafeBytes = sb.into();
 
         assert_eq!(&own_bytes.0, &own_bytes_restored.0,);
+    }
+
+    #[test]
+    fn default_test() {
+        assert_eq!(&vec![192_u8], SerializedBytes::default().bytes());
     }
 }
