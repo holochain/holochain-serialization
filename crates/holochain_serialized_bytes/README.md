@@ -47,9 +47,12 @@ There is one macro `holochain_serial!` that accepts a list of types.
 
 Each type passed to `holochain_serial!` will get default `TryFrom` using rust messagepack.
 
+There is also a `#[derive(SerializedBytes)]` that uses `holochain_serial!` internally
+and is re-exported by `holochain_serialized_bytes::prelude::*`.
+
 https://github.com/3Hren/msgpack-rust
 
-Definitely use `holochain_serial!` for all your types if you can.
+Definitely use `holochain_serial!` or `#[derive(SerializedBytes)]` for all your types if you can.
 
 You also need to derive or implement `Serialize` and `Deserialize` for your types.
 
@@ -57,19 +60,16 @@ It looks like this:
 
 ```rust
 /// struct with a utf8 string in it
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, SerializedBytes)]
 struct Foo {
     inner: String,
 }
 
 /// struct with raw bytes in it
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, SerializedBytes)]
 struct Bar {
     whatever: Vec<u8>,
 }
-
-/// register our types for messagepack implementation
-holochain_serial!(Foo, Bar);
 
 let foo = Foo { inner: "foo".into() };
 
@@ -257,16 +257,15 @@ https://rust-lang.github.io/api-guidelines/interoperability.html#data-structures
 
 ### Use of procedural macros instead of derive
 
-I chose to implement `holochain_serial!(FooType, BarType, ...)` as a proc macro instead of a derive.
+I chose to implement `holochain_serial!(FooType, BarType, ...)` as a proc macro in addition to a derive.
 
 I think this is a little non-standard but has a few advantages around dependency management and overall boilerplate.
 
+If you run into dependency issues with the derive, try the `holochain_serial!`
+macro.
+
 Derive macros require a separate `*_derive` crate, which means I can't do `$crate::SerializedBytes` which means I can't lock down fully qualified paths to things, which introduces room for mistakes and additional
 boilerplate/maintenance of dependencies.
-
-Even if we re-export the macro from the derive crate in the main crate, there would be
-circular dependencies if the derive crate tried to depend on the main crate to
-directly reference things in it.
 
 Another advantage is that "macros by example" (proc macros) are simply more straightfoward to write and maintain.
 

@@ -10,3 +10,4 @@ pub use crate::holochain_serial;
 pub use crate::SerializedBytes;
 pub use crate::SerializedBytesError;
 pub use crate::UnsafeBytes;
+pub use holochain_serialized_bytes_derive::SerializedBytes;

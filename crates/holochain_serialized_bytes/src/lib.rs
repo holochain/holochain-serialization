@@ -65,7 +65,7 @@ impl From<SerializedBytes> for UnsafeBytes {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Hash)]
 /// A Canonical Serialized Bytes representation for data
 /// If you have a data structure that needs a canonical byte representation use this
 /// Always round-trip through SerializedBytes via. a single TryFrom implementation.
@@ -216,42 +216,39 @@ pub mod tests {
     use std::convert::TryInto;
 
     /// struct with a utf8 string in it
-    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, SerializedBytes)]
     struct Foo {
         inner: String,
     }
 
     /// struct with raw bytes in it
-    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, SerializedBytes)]
     struct Bar {
         whatever: Vec<u8>,
     }
 
-    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, SerializedBytes)]
     enum BazResult {
         Ok(Vec<u8>),
         Err(String),
     }
 
     /// struct with raw bytes in it
-    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, SerializedBytes)]
     struct Baz {
         wow: Option<BazResult>,
     }
 
-    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, SerializedBytes)]
     struct Tiny(u8);
 
-    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, SerializedBytes)]
     struct SomeBytes(Vec<u8>);
 
-    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone)]
+    #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, SerializedBytes)]
     struct IncludesSerializedBytes {
         inner: SerializedBytes,
     }
-
-    // register all our types for messagepack implementations
-    holochain_serial!(Foo, Bar, Baz, Tiny, SomeBytes, IncludesSerializedBytes);
 
     fn fixture_foo() -> Foo {
         Foo {
