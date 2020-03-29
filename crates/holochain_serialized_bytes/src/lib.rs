@@ -183,13 +183,20 @@ macro_rules! holochain_serial {
     ( $( $t:ty ),* ) => {
 
         $(
-            impl std::convert::TryFrom<$t> for $crate::SerializedBytes {
+            impl std::convert::TryFrom<&$t> for $crate::SerializedBytes {
                 type Error = $crate::SerializedBytesError;
-                fn try_from(t: $t) -> std::result::Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
-                    match $crate::to_vec_named(&t) {
+                fn try_from(t: &$t) -> std::result::Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
+                    match $crate::to_vec_named(t) {
                         Ok(v) => Ok($crate::SerializedBytes::from($crate::UnsafeBytes::from(v))),
                         Err(e) => Err($crate::SerializedBytesError::ToBytes(e.to_string())),
                     }
+                }
+            }
+
+            impl std::convert::TryFrom<$t> for $crate::SerializedBytes {
+                type Error = $crate::SerializedBytesError;
+                fn try_from(t: $t) -> std::result::Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
+                    $crate::SerializedBytes::try_from(&t)
                 }
             }
 
@@ -276,6 +283,11 @@ pub mod tests {
                 let returned: $t = sb.try_into().unwrap();
 
                 assert_eq!(returned, i);
+
+                // as ref
+                let sb2 = SerializedBytes::try_from(&i).unwrap();
+
+                assert_eq!(&$o, sb2.bytes());
             }};
         }
 
