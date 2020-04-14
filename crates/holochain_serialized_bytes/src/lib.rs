@@ -10,7 +10,9 @@ use std::convert::TryFrom;
 
 pub mod prelude;
 
-#[derive(Debug, PartialEq)]
+#[derive(
+    Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, thiserror::Error,
+)]
 pub enum SerializedBytesError {
     /// somehow failed to move to bytes
     /// most likely hit a messagepack limit https://github.com/msgpack/msgpack/blob/master/spec.md#limitation
@@ -25,8 +27,6 @@ impl std::fmt::Display for SerializedBytesError {
         write!(f, "{:?}", self)
     }
 }
-
-impl std::error::Error for SerializedBytesError {}
 
 impl From<SerializedBytesError> for String {
     fn from(sb: SerializedBytesError) -> Self {
