@@ -17,3 +17,4 @@ serde_json = { version = "=1.0.48", features = ["preserve_order"] }
 holochain_serialized_bytes_derive = { version = "=0.0.36", path = "../holochain_serialized_bytes_derive" }
 rmp-serde = "=0.14.3"
 serde-transcode = "=1.1.0"
+thiserror = "1.0.10"
