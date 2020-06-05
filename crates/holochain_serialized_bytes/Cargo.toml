@@ -13,6 +13,7 @@ edition = "2018"
 
 [dependencies]
 serde = { version = "1.0.104", features = ["serde_derive"] }
+serde_bytes = "0.11"
 serde_json = { version = "1.0.51", features = ["preserve_order"] }
 holochain_serialized_bytes_derive = { version = "=0.0.39", path = "../holochain_serialized_bytes_derive" }
 rmp-serde = "0.14.3"

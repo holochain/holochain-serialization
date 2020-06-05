@@ -85,7 +85,7 @@ impl From<SerializedBytes> for UnsafeBytes {
 /// - round tripping data through a database that has its own serialization preferences
 /// - debug output or logging of data that is to be human readible
 /// - moving between data types within a single system that has no external facing representation
-pub struct SerializedBytes(Vec<u8>);
+pub struct SerializedBytes(#[serde(with = "serde_bytes")] Vec<u8>);
 
 impl SerializedBytes {
     pub fn bytes(&self) -> &Vec<u8> {
