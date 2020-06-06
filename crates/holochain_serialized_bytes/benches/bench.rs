@@ -36,7 +36,7 @@ pub fn round_trip_bytes(c: &mut Criterion) {
 
     macro_rules! do_it {
         ( $newtype:tt ) => {
-            for n in vec![0, 1, 1_000, 1_000_000, 1_000_000_000] {
+            for n in vec![0, 1, 1_000, 1_000_000] {
                 group.throughput(Throughput::Bytes(n as _));
                 group.sample_size(10);
                 group.bench_with_input(BenchmarkId::new(stringify!($newtype), n), &n, |b, &n| {
@@ -53,7 +53,7 @@ pub fn round_trip_bytes(c: &mut Criterion) {
         };
     };
 
-    // do_it!(GenericBytesNewType);
+    do_it!(GenericBytesNewType);
     do_it!(SpecializedBytesNewType);
 
     group.finish();
