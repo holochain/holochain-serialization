@@ -85,6 +85,14 @@ impl From<SerializedBytes> for UnsafeBytes {
 /// - round tripping data through a database that has its own serialization preferences
 /// - debug output or logging of data that is to be human readible
 /// - moving between data types within a single system that has no external facing representation
+///
+/// uses #[repr(transparent)] to maximise compatibility with ffi
+/// @see https://doc.rust-lang.org/1.26.2/unstable-book/language-features/repr-transparent.html#enter-reprtransparent
+///
+/// uses serde_bytes for efficient serialization and deserialization
+/// without this __every byte will be individually round tripped through serde__
+/// @see https://crates.io/crates/serde_bytes
+#[repr(transparent)]
 pub struct SerializedBytes(#[serde(with = "serde_bytes")] Vec<u8>);
 
 impl SerializedBytes {

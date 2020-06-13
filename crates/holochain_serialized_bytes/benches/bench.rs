@@ -59,6 +59,38 @@ pub fn round_trip_bytes(c: &mut Criterion) {
     group.finish();
 }
 
-criterion_group!(bench, round_trip_string, round_trip_bytes,);
+#[derive(serde::Serialize, serde::Deserialize, SerializedBytes)]
+struct SerializedBytesNewType(SerializedBytes);
+
+pub fn round_nested(c: &mut Criterion) {
+    let mut group = c.benchmark_group("round_nested");
+
+    macro_rules! do_it {
+        ( $newtype:tt ) => {
+            for n in vec![0, 1, 1_000, 1_000_000] {
+                group.throughput(Throughput::Bytes(n as _));
+                group.sample_size(10);
+                group.bench_with_input(BenchmarkId::new(stringify!($newtype), n), &n, |b, &n| {
+                    b.iter_batched(
+                        || vec![0_u8; n],
+                        |s| {
+                            let inner = SerializedBytes::try_from($newtype(s)).unwrap();
+                            <$newtype>::try_from(SerializedBytes::try_from(inner).unwrap())
+                                .unwrap();
+                        },
+                        criterion::BatchSize::PerIteration,
+                    );
+                });
+            }
+        };
+    };
+
+    do_it!(GenericBytesNewType);
+    do_it!(SpecializedBytesNewType);
+
+    group.finish();
+}
+
+criterion_group!(bench, round_trip_string, round_trip_bytes, round_nested);
 
 criterion_main!(bench);
