@@ -85,7 +85,15 @@ impl From<SerializedBytes> for UnsafeBytes {
 /// - round tripping data through a database that has its own serialization preferences
 /// - debug output or logging of data that is to be human readible
 /// - moving between data types within a single system that has no external facing representation
-pub struct SerializedBytes(Vec<u8>);
+///
+/// uses #[repr(transparent)] to maximise compatibility with ffi
+/// @see https://doc.rust-lang.org/1.26.2/unstable-book/language-features/repr-transparent.html#enter-reprtransparent
+///
+/// uses serde_bytes for efficient serialization and deserialization
+/// without this __every byte will be individually round tripped through serde__
+/// @see https://crates.io/crates/serde_bytes
+#[repr(transparent)]
+pub struct SerializedBytes(#[serde(with = "serde_bytes")] Vec<u8>);
 
 impl SerializedBytes {
     pub fn bytes(&self) -> &Vec<u8> {
@@ -340,8 +348,8 @@ pub mod tests {
                 inner: fixture_foo().try_into().unwrap()
             },
             vec![
-                129, 165, 105, 110, 110, 101, 114, 155, 204, 129, 204, 165, 105, 110, 110, 101,
-                114, 204, 163, 102, 111, 111
+                129, 165, 105, 110, 110, 101, 114, 196, 11, 129, 165, 105, 110, 110, 101, 114, 163,
+                102, 111, 111
             ]
         );
     }
