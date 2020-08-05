@@ -8,6 +8,8 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- Uses `with_struct_map` and `with_string_variants` rmp_serde config for more robust serialization
+
 ### Deprecated
 
 ### Removed
