@@ -1,10 +1,10 @@
 [package]
-name = "holochain_json_derive"
+name = "holochain_serialized_bytes_derive"
 version = "0.0.41"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
-description = "Provides derive macros for holochain persistence."
+description = "Provides derive macros for holochain serialized bytes."
 edition="2018"
-keywords = ["holochain", "holo", "json", "serde", "derive"]
+keywords = ["holochain", "holo", "bytes", "serde", "derive"]
 categories = ["parsing"]
 license = "Apache-2.0"
 readme = "README.md"
@@ -15,7 +15,5 @@ repository = "https://github.com/holochain/holochain-serialization"
 proc-macro = true
 
 [dependencies]
-syn = "=0.15.31"
-quote = "=0.6.11"
-serde = "=1.0.104"
-serde_json = { version = "1.0.51", features = ["preserve_order"] }
+syn = "0.15.31"
+quote = "0.6.11"

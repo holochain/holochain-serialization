@@ -24,14 +24,10 @@ with holonix.pkgs;
  dev-shell = stdenv.mkDerivation (holonix.shell // {
   name = "dev-shell";
 
-  buildInputs = [ ]
+  buildInputs = [
+   holonix.pkgs.gnuplot
+  ]
    ++ holonix.shell.buildInputs
-
-   # release hooks
-   ++ (holonix.pkgs.callPackage ./release {
-    pkgs = holonix.pkgs;
-    config = config;
-   }).buildInputs
 
    # main test script
    ++ (holonix.pkgs.callPackage ./test {
