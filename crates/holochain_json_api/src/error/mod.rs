@@ -9,7 +9,6 @@ use std::{
     error::Error,
     fmt,
     io::{self, Error as IoError},
-    option::NoneError,
 };
 
 //--------------------------------------------------------------------------------------------------
@@ -105,12 +104,6 @@ impl From<std::str::Utf8Error> for JsonError {
 impl From<FutureCanceled> for JsonError {
     fn from(_: FutureCanceled) -> Self {
         JsonError::ErrorGeneric("Failed future".to_string())
-    }
-}
-
-impl From<NoneError> for JsonError {
-    fn from(_: NoneError) -> Self {
-        JsonError::ErrorGeneric("Expected Some and got None".to_string())
     }
 }
 

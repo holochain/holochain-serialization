@@ -178,7 +178,7 @@ where
     T: Into<JsonString>,
 {
     fn from(result: Result<T, String>) -> JsonString {
-        result_to_json_string(result.map_err(|e| RawString::from(e)))
+        result_to_json_string(result.map_err(RawString::from))
     }
 }
 
@@ -187,17 +187,13 @@ where
     E: Into<JsonString>,
 {
     fn from(result: Result<String, E>) -> JsonString {
-        result_to_json_string(result.map(|v| RawString::from(v)))
+        result_to_json_string(result.map(RawString::from))
     }
 }
 
 impl From<Result<String, String>> for JsonString {
     fn from(result: Result<String, String>) -> JsonString {
-        result_to_json_string(
-            result
-                .map(|v| RawString::from(v))
-                .map_err(|e| RawString::from(e)),
-        )
+        result_to_json_string(result.map(RawString::from).map_err(RawString::from))
     }
 }
 
@@ -276,14 +272,14 @@ impl Display for JsonString {
 pub struct JsonStringOption<T>(Option<T>);
 
 impl<T> JsonStringOption<T> {
-    pub fn to_option(self) -> Option<T> {
+    pub fn into_option(self) -> Option<T> {
         self.0
     }
 }
 
 impl<T> Into<Option<T>> for JsonStringOption<T> {
     fn into(self) -> Option<T> {
-        self.to_option()
+        self.into_option()
     }
 }
 
@@ -604,15 +600,15 @@ pub mod tests {
     fn json_string_to_option() {
         let j = JsonString::from("10");
         let o: JsonStringOption<u32> = j.try_into().expect("failed conversion from JsonString");
-        assert_eq!(o.to_option(), Some(10));
+        assert_eq!(o.into_option(), Some(10));
 
         let j = JsonString::from("null");
         let o: JsonStringOption<u32> = j.try_into().expect("failed conversion from JsonString");
-        assert_eq!(o.to_option(), None);
+        assert_eq!(o.into_option(), None);
 
         // tricky!
         let j = JsonString::from("\"null\"");
         let o: JsonStringOption<String> = j.try_into().expect("failed conversion from JsonString");
-        assert_eq!(o.to_option(), Some("null".to_string()));
+        assert_eq!(o.into_option(), Some("null".to_string()));
     }
 }
