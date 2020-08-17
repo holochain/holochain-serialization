@@ -3,12 +3,27 @@ extern crate serde_json;
 
 extern crate rmp_serde;
 
-pub use rmp_serde::from_read_ref;
-pub use rmp_serde::to_vec_named;
 use serde::{Deserialize, Serialize};
 use std::convert::TryFrom;
 
 pub mod prelude;
+
+pub fn encode<T: serde::Serialize>(val: &T) -> Result<Vec<u8>, rmp_serde::encode::Error> {
+    let buf = Vec::with_capacity(128);
+    let mut se = rmp_serde::encode::Serializer::new(buf)
+        .with_struct_map()
+        .with_string_variants();
+    val.serialize(&mut se)?;
+    Ok(se.into_inner())
+}
+
+pub fn decode<'a, R, T>(rd: &'a R) -> Result<T, rmp_serde::decode::Error>
+where
+    R: AsRef<[u8]> + ?Sized,
+    T: Deserialize<'a>,
+{
+    rmp_serde::from_read_ref(rd)
+}
 
 #[derive(
     Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, thiserror::Error,
@@ -85,6 +100,14 @@ impl From<SerializedBytes> for UnsafeBytes {
 /// - round tripping data through a database that has its own serialization preferences
 /// - debug output or logging of data that is to be human readible
 /// - moving between data types within a single system that has no external facing representation
+///
+/// uses #[repr(transparent)] to maximise compatibility with ffi
+/// @see https://doc.rust-lang.org/1.26.2/unstable-book/language-features/repr-transparent.html#enter-reprtransparent
+///
+/// uses serde_bytes for efficient serialization and deserialization
+/// without this __every byte will be individually round tripped through serde__
+/// @see https://crates.io/crates/serde_bytes
+#[repr(transparent)]
 pub struct SerializedBytes(#[serde(with = "serde_bytes")] Vec<u8>);
 
 impl SerializedBytes {
@@ -101,6 +124,9 @@ impl SerializedBytes {
 /// .bytes() method on SerializedBytes and debug that.
 impl std::fmt::Debug for SerializedBytes {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        // NB: there is a crate::decode function which currently simply uses
+        // from_read_ref. If that ever changes, this may become inconsistent
+        // and should be changed also.
         let mut deserializer = rmp_serde::Deserializer::from_read_ref(&self.0);
         let writer = Vec::new();
         let mut serializer = serde_json::ser::Serializer::new(writer);
@@ -187,7 +213,7 @@ macro_rules! holochain_serial {
             impl std::convert::TryFrom<&$t> for $crate::SerializedBytes {
                 type Error = $crate::SerializedBytesError;
                 fn try_from(t: &$t) -> std::result::Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
-                    match $crate::to_vec_named(t) {
+                    match $crate::encode(t) {
                         Ok(v) => Ok($crate::SerializedBytes::from($crate::UnsafeBytes::from(v))),
                         Err(e) => Err($crate::SerializedBytesError::ToBytes(e.to_string())),
                     }
@@ -204,7 +230,7 @@ macro_rules! holochain_serial {
             impl std::convert::TryFrom<$crate::SerializedBytes> for $t {
                 type Error = $crate::SerializedBytesError;
                 fn try_from(sb: $crate::SerializedBytes) -> std::result::Result<$t, $crate::SerializedBytesError> {
-                    match $crate::from_read_ref(sb.bytes()) {
+                    match $crate::decode(sb.bytes()) {
                         Ok(v) => Ok(v),
                         Err(e) => Err($crate::SerializedBytesError::FromBytes(e.to_string())),
                     }
@@ -321,7 +347,7 @@ pub mod tests {
             Baz {
                 wow: Some(BazResult::Ok(vec![2, 5, 6]))
             },
-            vec![129, 163, 119, 111, 119, 129, 0, 147, 2, 5, 6]
+            vec![129, 163, 119, 111, 119, 129, 162, 79, 107, 147, 2, 5, 6]
         );
 
         do_test!(Tiny, Tiny(5), vec![5]);

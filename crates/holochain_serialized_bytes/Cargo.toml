@@ -1,6 +1,6 @@
 [package]
 name = "holochain_serialized_bytes"
-version = "0.0.39"
+version = "0.0.41"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 description = "serialized bytes for holochain"
 keywords = ["holochain", "holo", "messagepack", "json", "serialization"]
@@ -15,7 +15,18 @@ edition = "2018"
 serde = { version = "1.0.104", features = ["serde_derive"] }
 serde_bytes = "0.11"
 serde_json = { version = "1.0.51", features = ["preserve_order"] }
-holochain_serialized_bytes_derive = { version = "=0.0.39", path = "../holochain_serialized_bytes_derive" }
+holochain_serialized_bytes_derive = { version = "=0.0.41", path = "../holochain_serialized_bytes_derive" }
 rmp-serde = "0.14.3"
 serde-transcode = "1.1.0"
 thiserror = "1.0.10"
+serde_bytes = "0.11"
+
+[dev-dependencies]
+criterion = "0.3"
+
+[[bench]]
+name = "bench"
+harness = false
+
+[profile.release]
+debug = true
