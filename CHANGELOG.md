@@ -2,6 +2,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.42] - 2020-08-17
+
+### Added
+
+### Changed
+
+- Uses `with_struct_map` and `with_string_variants` rmp_serde config for more robust serialization
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [0.0.41] - 2020-08-05
 
 ### Added
