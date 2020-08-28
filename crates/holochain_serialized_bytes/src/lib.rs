@@ -81,7 +81,6 @@ impl From<SerializedBytes> for UnsafeBytes {
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Serialize, Deserialize, Hash)]
 /// A Canonical Serialized Bytes representation for data
 /// If you have a data structure that needs a canonical byte representation use this
 /// Always round-trip through SerializedBytes via. a single TryFrom implementation.
@@ -107,6 +106,7 @@ impl From<SerializedBytes> for UnsafeBytes {
 /// uses serde_bytes for efficient serialization and deserialization
 /// without this __every byte will be individually round tripped through serde__
 /// @see https://crates.io/crates/serde_bytes
+#[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Hash)]
 #[repr(transparent)]
 pub struct SerializedBytes(#[serde(with = "serde_bytes")] Vec<u8>);
 
