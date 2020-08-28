@@ -114,9 +114,6 @@ impl SerializedBytes {
     pub fn bytes(&self) -> &Vec<u8> {
         &self.0
     }
-    pub fn into_bytes(self) -> Vec<u8> {
-        self.0
-    }
 }
 
 /// A bit of magic to convert the internal messagepack bytes into roughly equivalent JSON output
