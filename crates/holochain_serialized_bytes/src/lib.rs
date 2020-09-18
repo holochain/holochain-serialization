@@ -49,7 +49,7 @@ impl From<SerializedBytesError> for String {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 /// UnsafeBytes the only way to implement a custom round trip through bytes for SerializedBytes
 /// It is intended to be an internal implementation in TryFrom implementations
 /// The assumption is that any code using UnsafeBytes is NOT valid messagepack data
@@ -392,6 +392,8 @@ pub mod tests {
         let own_bytes_restored: UnsafeBytes = sb.into();
 
         assert_eq!(&own_bytes.0, &own_bytes_restored.0,);
+        assert_eq!(&bytes, &own_bytes.0);
+        assert_eq!(&bytes, &own_bytes_restored.0);
     }
 
     #[test]
