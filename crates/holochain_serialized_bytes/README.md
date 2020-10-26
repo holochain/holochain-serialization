@@ -14,7 +14,7 @@ consistently in a "fool proof" way.
 - Able to preserve semantics for debugging
 - Able to derive a sane serialization for the 99% of use cases
 - Able to manually implement serialization for edge-cases (e.g. Merkle Trees)
-- Able to be form a base infrastructure layer for both wasm and networking
+- Able to form a base infrastructure layer for both wasm and networking
 - Able to leverage the Rust compiler as much as possible to avoid bugs and help refactors
 
 There are some additional goals of this crate that I'd like to make explicit
@@ -39,7 +39,7 @@ These bytes are by default to be MessagePack serialized binary data.
 
 https://msgpack.org/
 
-There is constructor for it e.g. there is no `SerializedBytes::new()`.
+There isn't a constructor for it e.g. there is no `SerializedBytes::new()`.
 
 Implement `TryFrom<SerializedBytes> for Foo` and `TryFrom<Foo> for SerializedBytes`.
 
@@ -94,7 +94,7 @@ If you want a read only view of the actual messagepack bytes call the `.bytes()`
 These design limitations all exist to keep things simple.
 
 I acknowledge that some of these limitations are quite strict and may even feel quite
-restrictive in a "local optimisation" kind of way, but in context of where and
+restrictive in a "local optimisation" kind of way, but in the context of where and
 how `SerializedBytes` is intended to be employed, it should all be for the greater good ;)
 
 ### Messagepack limits
@@ -167,7 +167,7 @@ all essentially "stringly typed" full of backslashes to escape it all.
 
 https://www.xkcd.com/1638/
 
-Things like `Option` and `Result` aren't representation of domain specific data
+Things like `Option` and `Result` aren't representations of domain specific data
 anyway, they are conceits of compiler type systems. They don't need to be
 serialized because the type information needs to be given to the compiler by the
 developer for rust to be able to deserialize anyway.
@@ -224,8 +224,8 @@ The current setup that avoids primatives does the heavy lifting in under 50 LOC.
 - example messy code: https://github.com/holochain/holochain-serialization/pull/15/files#diff-634e1fc4ddb3416a36776dac7cfaa965R187
 
 **Important note:** all of these types, including `Result` and `Option` and even
-`SerializedBytes`itself, all implement both `Serialize` and `Deserialize` which
-means they can be used _within_ your custom struct/enum type, but please be mindful
+`SerializedBytes`itself, implement both `Serialize` and `Deserialize` which
+means they can be used _within_ your custom struct/enum type; but please be mindful
 of the above when representing domain data in a serialized format.
 
 **Important note:** New types/tuples serialize to the same bytes as the primitive they
