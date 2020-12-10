@@ -21,7 +21,7 @@ serde_json = { version = "1.0.51", features = ["preserve_order"] }
 multihash = "=0.8.0"
 futures = "=0.3.5"
 hcid = "=0.0.6"
-shrinkwraprs = "=0.2.1"
+shrinkwraprs = "=0.3.0"
 objekt = "=0.1.2"
 # keep the version on the left hand side
 # there is a regex in the release hook looking for it
