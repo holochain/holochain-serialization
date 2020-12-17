@@ -1,6 +1,6 @@
 [package]
 name = "holochain_json_api"
-version = "0.0.46"
+version = "0.0.47"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 build = "build.rs"
 description = "json api and utilities for holochain"
@@ -25,7 +25,7 @@ shrinkwraprs = "=0.3.0"
 objekt = "=0.1.2"
 # keep the version on the left hand side
 # there is a regex in the release hook looking for it
-holochain_json_derive = { version = "=0.0.46", path = "../holochain_json_derive" }
+holochain_json_derive = { version = "=0.0.47", path = "../holochain_json_derive" }
 uuid = { version = "=0.7.1", features = ["v4"] }
 
 [dev-dependencies]
