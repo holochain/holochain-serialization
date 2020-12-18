@@ -4,6 +4,7 @@ extern crate serde_json;
 extern crate rmp_serde;
 
 use serde::{Deserialize, Serialize};
+use std::convert::Infallible;
 use std::convert::TryFrom;
 
 pub mod prelude;
@@ -47,6 +48,12 @@ impl std::fmt::Display for SerializedBytesError {
 impl From<SerializedBytesError> for String {
     fn from(sb: SerializedBytesError) -> Self {
         format!("{:?}", sb)
+    }
+}
+
+impl From<Infallible> for SerializedBytesError {
+    fn from(_: Infallible) -> Self {
+        unreachable!()
     }
 }
 
@@ -243,6 +250,13 @@ holochain_serial!(());
 impl Default for SerializedBytes {
     fn default() -> Self {
         SerializedBytes::try_from(()).unwrap()
+    }
+}
+
+impl<'a> TryFrom<&'a SerializedBytes> for SerializedBytes {
+    type Error = SerializedBytesError;
+    fn try_from(s: &'a SerializedBytes) -> Result<Self, Self::Error> {
+        Ok(s.clone())
     }
 }
 
