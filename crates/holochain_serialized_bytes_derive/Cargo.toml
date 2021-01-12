@@ -1,6 +1,6 @@
 [package]
 name = "holochain_serialized_bytes_derive"
-version = "0.0.45"
+version = "0.0.47"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 description = "Provides derive macros for holochain serialized bytes."
 edition="2018"
@@ -15,5 +15,5 @@ repository = "https://github.com/holochain/holochain-serialization"
 proc-macro = true
 
 [dependencies]
-syn = "0.15.31"
-quote = "0.6.11"
+syn = "1.0"
+quote = "1.0"

@@ -4,25 +4,27 @@ extern crate serde_json;
 extern crate rmp_serde;
 
 use serde::{Deserialize, Serialize};
+use std::convert::Infallible;
 use std::convert::TryFrom;
 
 pub mod prelude;
 
-pub fn encode<T: serde::Serialize>(val: &T) -> Result<Vec<u8>, rmp_serde::encode::Error> {
+pub fn encode<T: serde::Serialize>(val: &T) -> Result<Vec<u8>, SerializedBytesError> {
     let buf = Vec::with_capacity(128);
     let mut se = rmp_serde::encode::Serializer::new(buf)
         .with_struct_map()
         .with_string_variants();
-    val.serialize(&mut se)?;
+    val.serialize(&mut se)
+        .map_err(|err| SerializedBytesError::ToBytes(err.to_string()))?;
     Ok(se.into_inner())
 }
 
-pub fn decode<'a, R, T>(rd: &'a R) -> Result<T, rmp_serde::decode::Error>
+pub fn decode<'a, R, T>(rd: &'a R) -> Result<T, SerializedBytesError>
 where
     R: AsRef<[u8]> + ?Sized,
     T: Deserialize<'a>,
 {
-    rmp_serde::from_read_ref(rd)
+    rmp_serde::from_read_ref(rd).map_err(|err| SerializedBytesError::FromBytes(err.to_string()))
 }
 
 #[derive(
@@ -46,6 +48,12 @@ impl std::fmt::Display for SerializedBytesError {
 impl From<SerializedBytesError> for String {
     fn from(sb: SerializedBytesError) -> Self {
         format!("{:?}", sb)
+    }
+}
+
+impl From<Infallible> for SerializedBytesError {
+    fn from(_: Infallible) -> Self {
+        unreachable!()
     }
 }
 
@@ -213,10 +221,9 @@ macro_rules! holochain_serial {
             impl std::convert::TryFrom<&$t> for $crate::SerializedBytes {
                 type Error = $crate::SerializedBytesError;
                 fn try_from(t: &$t) -> std::result::Result<$crate::SerializedBytes, $crate::SerializedBytesError> {
-                    match $crate::encode(t) {
-                        Ok(v) => Ok($crate::SerializedBytes::from($crate::UnsafeBytes::from(v))),
-                        Err(e) => Err($crate::SerializedBytesError::ToBytes(e.to_string())),
-                    }
+                    $crate::encode(t).map(|v|
+                        $crate::SerializedBytes::from($crate::UnsafeBytes::from(v))
+                    )
                 }
             }
 
@@ -230,10 +237,7 @@ macro_rules! holochain_serial {
             impl std::convert::TryFrom<$crate::SerializedBytes> for $t {
                 type Error = $crate::SerializedBytesError;
                 fn try_from(sb: $crate::SerializedBytes) -> std::result::Result<$t, $crate::SerializedBytesError> {
-                    match $crate::decode(sb.bytes()) {
-                        Ok(v) => Ok(v),
-                        Err(e) => Err($crate::SerializedBytesError::FromBytes(e.to_string())),
-                    }
+                    $crate::decode(sb.bytes())
                 }
             }
         )*
@@ -246,6 +250,13 @@ holochain_serial!(());
 impl Default for SerializedBytes {
     fn default() -> Self {
         SerializedBytes::try_from(()).unwrap()
+    }
+}
+
+impl<'a> TryFrom<&'a SerializedBytes> for SerializedBytes {
+    type Error = SerializedBytesError;
+    fn try_from(s: &'a SerializedBytes) -> Result<Self, Self::Error> {
+        Ok(s.clone())
     }
 }
 
