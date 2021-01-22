@@ -11,3 +11,6 @@ pub use crate::SerializedBytes;
 pub use crate::SerializedBytesError;
 pub use crate::UnsafeBytes;
 pub use holochain_serialized_bytes_derive::SerializedBytes;
+
+pub use crate::decode;
+pub use crate::encode;

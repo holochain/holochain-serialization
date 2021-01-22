@@ -9,13 +9,15 @@ use std::convert::TryFrom;
 
 pub mod prelude;
 
-pub fn encode<T: serde::Serialize>(val: &T) -> Result<Vec<u8>, SerializedBytesError> {
+pub fn encode<T: serde::Serialize + std::fmt::Debug>(
+    val: &T,
+) -> Result<Vec<u8>, SerializedBytesError> {
     let buf = Vec::with_capacity(128);
     let mut se = rmp_serde::encode::Serializer::new(buf)
         .with_struct_map()
         .with_string_variants();
     val.serialize(&mut se)
-        .map_err(|err| SerializedBytesError::ToBytes(err.to_string()))?;
+        .map_err(|err| SerializedBytesError::Serialize(err.to_string(), format!("{:?}", val)))?;
     Ok(se.into_inner())
 }
 
@@ -24,7 +26,8 @@ where
     R: AsRef<[u8]> + ?Sized,
     T: Deserialize<'a>,
 {
-    rmp_serde::from_read_ref(rd).map_err(|err| SerializedBytesError::FromBytes(err.to_string()))
+    rmp_serde::from_read_ref(rd)
+        .map_err(|err| SerializedBytesError::Deserialize(err.to_string(), rd.as_ref().to_vec()))
 }
 
 #[derive(
@@ -33,10 +36,35 @@ where
 pub enum SerializedBytesError {
     /// somehow failed to move to bytes
     /// most likely hit a messagepack limit https://github.com/msgpack/msgpack/blob/master/spec.md#limitation
-    ToBytes(String),
+    Serialize(String, String),
     /// somehow failed to restore bytes
     /// i mean, this could be anything, how do i know what's wrong with your bytes?
-    FromBytes(String),
+    Deserialize(String, Vec<u8>),
+}
+
+impl SerializedBytesError {
+    pub fn as_serde_error(&self) -> &str {
+        match self {
+            SerializedBytesError::Serialize(e, _) => e,
+            SerializedBytesError::Deserialize(e, _) => e,
+        }
+    }
+
+    /// The debug representation of the unserializable input.
+    pub fn as_unserializable(&self) -> &str {
+        match self {
+            SerializedBytesError::Serialize(_, i) => i,
+            _ => unreachable!(),
+        }
+    }
+
+    /// The debug representation of the undeserializable input.
+    pub fn as_undeserializable(&self) -> &[u8] {
+        match self {
+            SerializedBytesError::Deserialize(_, i) => i,
+            _ => unreachable!(),
+        }
+    }
 }
 
 impl std::fmt::Display for SerializedBytesError {
@@ -166,7 +194,7 @@ impl std::fmt::Debug for SerializedBytes {
 /// ```
 /// use holochain_serialized_bytes::prelude::*;
 ///
-/// #[derive(Serialize, Deserialize)]
+/// #[derive(Serialize, Deserialize, Debug)]
 /// pub struct SomeType(u32);
 /// holochain_serial!(SomeType);
 /// let serialized_bytes = SerializedBytes::try_from(SomeType(50)).unwrap();
@@ -310,6 +338,20 @@ pub mod tests {
     fn fixture_bar() -> Bar {
         Bar {
             whatever: vec![1_u8, 2_u8, 3_u8],
+        }
+    }
+
+    #[test]
+    fn test_error() {
+        let bad_bytes = vec![1, 2, 3];
+        let error: Result<String, SerializedBytesError> = decode(&bad_bytes);
+
+        match error {
+            Err(e) => {
+                assert_eq!(e.as_undeserializable().to_vec(), bad_bytes);
+                assert_eq!(e.as_serde_error(), "invalid type: integer `1`, expected a string");
+            },
+            _ => unreachable!(),
         }
     }
 
