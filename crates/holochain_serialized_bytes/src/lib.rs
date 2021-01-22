@@ -31,7 +31,16 @@ where
 }
 
 #[derive(
-    Clone, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, thiserror::Error,
+    Clone,
+    Debug,
+    PartialEq,
+    Eq,
+    Hash,
+    PartialOrd,
+    Ord,
+    serde::Serialize,
+    serde::Deserialize,
+    thiserror::Error,
 )]
 pub enum SerializedBytesError {
     /// somehow failed to move to bytes
@@ -39,7 +48,7 @@ pub enum SerializedBytesError {
     Serialize(String, String),
     /// somehow failed to restore bytes
     /// i mean, this could be anything, how do i know what's wrong with your bytes?
-    Deserialize(String, Vec<u8>),
+    Deserialize(String, #[serde(with = "serde_bytes")] Vec<u8>),
 }
 
 impl SerializedBytesError {
@@ -349,8 +358,11 @@ pub mod tests {
         match error {
             Err(e) => {
                 assert_eq!(e.as_undeserializable().to_vec(), bad_bytes);
-                assert_eq!(e.as_serde_error(), "invalid type: integer `1`, expected a string");
-            },
+                assert_eq!(
+                    e.as_serde_error(),
+                    "invalid type: integer `1`, expected a string"
+                );
+            }
             _ => unreachable!(),
         }
     }
