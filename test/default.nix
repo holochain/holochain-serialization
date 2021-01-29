@@ -9,7 +9,7 @@ let
   && hn-rust-clippy \
   && cargo test
 
-  RUST_LOG=trace cargo test \
+  cargo test \
     --manifest-path="crates/holochain_serialized_bytes/Cargo.toml" \
     --features="trace" \
     -- --nocapture
