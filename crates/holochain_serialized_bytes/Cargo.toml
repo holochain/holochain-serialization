@@ -19,10 +19,11 @@ rmp-serde = "0.14.3"
 serde-transcode = "1.1.0"
 thiserror = "1.0.10"
 serde_bytes = "0.11"
-tracing = { version = "0.1.22", optional = true }
+tracing = { version = "0.1", optional = true }
 
 [dev-dependencies]
 criterion = "0.3"
+tracing-subscriber="0.2"
 
 [[bench]]
 name = "bench"
@@ -32,4 +33,4 @@ harness = false
 debug = true
 
 [features]
-trace-errors = ["tracing"]
+trace = ["tracing"]

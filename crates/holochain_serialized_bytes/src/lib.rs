@@ -9,6 +9,7 @@ use std::convert::TryFrom;
 
 pub mod prelude;
 
+#[cfg_attr(feature = "trace", tracing::instrument)]
 pub fn encode<T: serde::Serialize + std::fmt::Debug>(
     val: &T,
 ) -> Result<Vec<u8>, SerializedBytesError> {
@@ -16,22 +17,38 @@ pub fn encode<T: serde::Serialize + std::fmt::Debug>(
     let mut se = rmp_serde::encode::Serializer::new(buf)
         .with_struct_map()
         .with_string_variants();
-    val.serialize(&mut se)
-        .map_err(|err| {
-            #[cfg(feature = "tracing")]
-            tracing::trace!(val);
-            SerializedBytesError::Serialize(err.to_string())
-        })?;
-    Ok(se.into_inner())
+    val.serialize(&mut se).map_err(|err| {
+        #[cfg(feature = "trace")]
+        tracing::warn!("Failed to serialize input");
+        SerializedBytesError::Serialize(err.to_string())
+    })?;
+    let ret = se.into_inner();
+    #[cfg(feature = "trace")]
+    tracing::trace!(
+        "Serialized {} input into {:?}",
+        std::any::type_name::<T>(),
+        ret
+    );
+    Ok(ret)
 }
 
-pub fn decode<'a, R, T>(rd: &'a R) -> Result<T, SerializedBytesError>
+#[cfg_attr(feature = "trace", tracing::instrument)]
+pub fn decode<'a, R, T>(input: &'a R) -> Result<T, SerializedBytesError>
 where
-    R: AsRef<[u8]> + ?Sized,
-    T: Deserialize<'a>,
+    R: AsRef<[u8]> + ?Sized + std::fmt::Debug,
+    T: Deserialize<'a> + std::fmt::Debug,
 {
-    rmp_serde::from_read_ref(rd)
-        .map_err(|err| SerializedBytesError::Deserialize(err.to_string(), rd.as_ref().to_vec()))
+    let ret = rmp_serde::from_read_ref(input).map_err(|err| {
+        #[cfg(feature = "trace")]
+        tracing::warn!(
+            "Failed to deserialize input into: {}",
+            std::any::type_name::<T>()
+        );
+        SerializedBytesError::Deserialize(err.to_string())
+    })?;
+    #[cfg(feature = "trace")]
+    tracing::trace!("Deserialized input into: {:?}", ret);
+    Ok(ret)
 }
 
 #[derive(
@@ -332,21 +349,47 @@ pub mod tests {
         }
     }
 
+    #[cfg(feature = "trace")]
     #[test]
-    fn test_error() {
-        let bad_bytes = vec![1, 2, 3];
-        let error: Result<String, SerializedBytesError> = decode(&bad_bytes);
+    fn test_trace() {
+        let collector = tracing_subscriber::fmt()
+            .with_max_level(tracing::Level::TRACE)
+            .finish();
 
-        match error {
-            Err(e) => {
-                assert_eq!(e.as_undeserializable().to_vec(), bad_bytes);
-                assert_eq!(
-                    e.as_serde_error(),
-                    "invalid type: integer `1`, expected a string"
-                );
+        #[derive(Debug)]
+        struct BadSerialize;
+
+        impl serde::Serialize for BadSerialize {
+            fn serialize<S>(&self, _serializer: S) -> Result<S::Ok, S::Error>
+            where
+                S: serde::Serializer,
+            {
+                Err(serde::ser::Error::custom("Cannot serialize!"))
             }
-            _ => unreachable!(),
         }
+
+        tracing::subscriber::with_default(collector, || {
+            let bad_bytes = vec![1, 2, 3];
+            let encode_error: Result<Vec<u8>, SerializedBytesError> = encode(&BadSerialize);
+            assert_eq!(
+                encode_error,
+                Err(SerializedBytesError::Serialize("Cannot serialize!".into()))
+            );
+
+            let decode_error: Result<String, SerializedBytesError> = decode(&bad_bytes);
+            assert_eq!(
+                decode_error,
+                Err(SerializedBytesError::Deserialize(
+                    "invalid type: integer `1`, expected a string".into()
+                ))
+            );
+
+            let encode: Result<Vec<u8>, SerializedBytesError> = encode(&());
+            assert_eq!(encode.unwrap(), vec![192],);
+
+            let decode: Result<(), SerializedBytesError> = decode(&vec![192]);
+            assert_eq!(decode.unwrap(), ());
+        });
     }
 
     #[test]
