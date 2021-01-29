@@ -17,7 +17,11 @@ pub fn encode<T: serde::Serialize + std::fmt::Debug>(
         .with_struct_map()
         .with_string_variants();
     val.serialize(&mut se)
-        .map_err(|err| SerializedBytesError::Serialize(err.to_string(), format!("{:?}", val)))?;
+        .map_err(|err| {
+            #[cfg(feature = "tracing")]
+            tracing::trace!(val);
+            SerializedBytesError::Serialize(err.to_string())
+        })?;
     Ok(se.into_inner())
 }
 
@@ -45,35 +49,10 @@ where
 pub enum SerializedBytesError {
     /// somehow failed to move to bytes
     /// most likely hit a messagepack limit https://github.com/msgpack/msgpack/blob/master/spec.md#limitation
-    Serialize(String, String),
+    Serialize(String),
     /// somehow failed to restore bytes
     /// i mean, this could be anything, how do i know what's wrong with your bytes?
-    Deserialize(String, #[serde(with = "serde_bytes")] Vec<u8>),
-}
-
-impl SerializedBytesError {
-    pub fn as_serde_error(&self) -> &str {
-        match self {
-            SerializedBytesError::Serialize(e, _) => e,
-            SerializedBytesError::Deserialize(e, _) => e,
-        }
-    }
-
-    /// The debug representation of the unserializable input.
-    pub fn as_unserializable(&self) -> &str {
-        match self {
-            SerializedBytesError::Serialize(_, i) => i,
-            _ => unreachable!(),
-        }
-    }
-
-    /// The debug representation of the undeserializable input.
-    pub fn as_undeserializable(&self) -> &[u8] {
-        match self {
-            SerializedBytesError::Deserialize(_, i) => i,
-            _ => unreachable!(),
-        }
-    }
+    Deserialize(String),
 }
 
 impl std::fmt::Display for SerializedBytesError {
@@ -84,7 +63,10 @@ impl std::fmt::Display for SerializedBytesError {
 
 impl From<SerializedBytesError> for String {
     fn from(sb: SerializedBytesError) -> Self {
-        format!("{:?}", sb)
+        match sb {
+            SerializedBytesError::Serialize(s) => s,
+            SerializedBytesError::Deserialize(s) => s,
+        }
     }
 }
 
