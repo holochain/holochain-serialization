@@ -8,6 +8,11 @@ let
   hn-rust-fmt-check \
   && hn-rust-clippy \
   && cargo test
+
+  cargo test \
+    --manifest-path="crates/holochain_serialized_bytes/Cargo.toml" \
+    --features="trace" \
+    -- --nocapture
   '';
 in
 {
