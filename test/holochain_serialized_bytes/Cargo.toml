@@ -1,6 +1,6 @@
 [package]
 name = "test_holochain_serialized_bytes"
-version = "0.0.48"
+version = "0.0.49"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 description = "test serialized bytes for holochain"
 keywords = ["holochain", "holo", "messagepack", "json", "serialization"]
@@ -11,5 +11,5 @@ documentation = "https://docs.rs/holochain_serialized_bytes"
 repository = "https://github.com/holochain/holochain-serialization"
 
 [dependencies]
-holochain_serialized_bytes = { version = "=0.0.48", path = "../../crates/holochain_serialized_bytes" }
+holochain_serialized_bytes = { version = "=0.0.49", path = "../../crates/holochain_serialized_bytes" }
 serde = "=1.0.104"
