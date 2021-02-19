@@ -12,4 +12,4 @@ repository = "https://github.com/holochain/holochain-serialization"
 
 [dependencies]
 holochain_serialized_bytes = { version = "=0.0.49", path = "../../crates/holochain_serialized_bytes" }
-serde = "=1.0.104"
+serde = "1.0.123"
