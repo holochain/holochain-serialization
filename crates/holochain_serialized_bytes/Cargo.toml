@@ -29,8 +29,5 @@ tracing-subscriber="0.2"
 name = "bench"
 harness = false
 
-[profile.release]
-debug = true
-
 [features]
 trace = ["tracing"]
