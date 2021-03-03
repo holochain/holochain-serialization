@@ -155,8 +155,14 @@ impl From<SerializedBytes> for UnsafeBytes {
 pub struct SerializedBytes(#[serde(with = "serde_bytes")] Vec<u8>);
 
 impl SerializedBytes {
-    pub fn bytes(&self) -> &Vec<u8> {
-        &self.0
+    pub fn bytes(&self) -> &[u8] {
+        self.0.as_slice()
+    }
+}
+
+impl AsRef<[u8]> for SerializedBytes {
+    fn as_ref(&self) -> &[u8] {
+        self.0.as_slice()
     }
 }
 
