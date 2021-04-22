@@ -94,6 +94,7 @@ impl From<Infallible> for SerializedBytesError {
 }
 
 #[derive(Clone, Debug)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 /// UnsafeBytes the only way to implement a custom round trip through bytes for SerializedBytes
 /// It is intended to be an internal implementation in TryFrom implementations
 /// The assumption is that any code using UnsafeBytes is NOT valid messagepack data
@@ -151,6 +152,7 @@ impl From<SerializedBytes> for UnsafeBytes {
 /// without this __every byte will be individually round tripped through serde__
 /// @see https://crates.io/crates/serde_bytes
 #[derive(Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize, Hash)]
+#[cfg_attr(feature = "arbitrary", derive(arbitrary::Arbitrary))]
 #[repr(transparent)]
 pub struct SerializedBytes(#[serde(with = "serde_bytes")] Vec<u8>);
 
