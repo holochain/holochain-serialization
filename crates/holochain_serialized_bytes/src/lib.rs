@@ -176,9 +176,12 @@ impl std::fmt::Debug for SerializedBytes {
         let mut deserializer = rmp_serde::Deserializer::from_read_ref(&self.0);
         let writer = Vec::new();
         let mut serializer = serde_json::ser::Serializer::new(writer);
-        serde_transcode::transcode(&mut deserializer, &mut serializer).unwrap();
-        let s = unsafe { String::from_utf8_unchecked(serializer.into_inner()) };
-        write!(f, "{}", s)
+        if let Err(_) = serde_transcode::transcode(&mut deserializer, &mut serializer) {
+            write!(f, "<invalid msgpack>")
+        } else {
+            let s = unsafe { String::from_utf8_unchecked(serializer.into_inner()) };
+            write!(f, "{}", s)
+        }
     }
 }
 
