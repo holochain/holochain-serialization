@@ -2,6 +2,22 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.51] - 2021-07-20
+
+### Added
+
+- `impl Arbitrary for SerializedBytes`
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
 ## [0.0.50] - 2021-02-21
 
 ### Added
@@ -77,7 +93,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 ### Added
 
 ### Changed
-- `SerializedBytesError` can from `Infallible`. 
+- `SerializedBytesError` can from `Infallible`.
 - `SerializedBytes` can `TryFrom<&SerializedBytes>` by cloning.
 
 ### Deprecated
