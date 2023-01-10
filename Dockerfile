@@ -1,0 +1,1 @@
+FROM holochain/fuzzbox:base
