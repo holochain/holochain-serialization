@@ -1,4 +1,4 @@
-name: build fuzzbox
+name: build docker
 
 on:
   push:
