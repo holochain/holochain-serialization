@@ -1,0 +1,11 @@
+name: lint
+
+on: [push]
+
+jobs:
+  lint:
+    runs-on: nixos/nix:latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: nix-shell --run hn-rust-fmt-check
+      - run: nix-shell --run hn-rust-clippy
