@@ -477,6 +477,19 @@ pub mod tests {
     }
 
     #[test_fuzz::test_fuzz]
+    fn round_any_string(inner: String) {
+        let foo = Foo {
+            inner
+        };
+        let _: Foo = super::decode(&super::encode(&foo).unwrap()).unwrap();
+    }
+
+    #[test]
+    fn round_a_string() {
+        round_any_string("foo".into());
+    }
+
+    #[test_fuzz::test_fuzz]
     fn provide_own_bytes(bytes: Vec<u8>) {
         // let bytes = vec![1_u8, 90_u8, 155_u8];
         let own_bytes = UnsafeBytes::from(bytes.clone());
