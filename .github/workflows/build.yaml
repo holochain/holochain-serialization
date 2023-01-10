@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - 2023-01-10-fuzz
 
 jobs:
   build:
