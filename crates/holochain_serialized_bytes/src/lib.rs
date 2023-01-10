@@ -476,9 +476,9 @@ pub mod tests {
         assert_eq!(sb, sb_2,);
     }
 
-    #[test]
-    fn provide_own_bytes() {
-        let bytes = vec![1_u8, 90_u8, 155_u8];
+    #[test_fuzz::test_fuzz]
+    fn provide_own_bytes(bytes: Vec<u8>) {
+        // let bytes = vec![1_u8, 90_u8, 155_u8];
         let own_bytes = UnsafeBytes::from(bytes.clone());
         let sb: SerializedBytes = own_bytes.clone().into();
 
