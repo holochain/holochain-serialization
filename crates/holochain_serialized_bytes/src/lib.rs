@@ -491,6 +491,28 @@ pub mod tests {
         assert_eq!(&bytes, &own_bytes_restored.0);
     }
 
+    #[derive(Deserialize, Debug)]
+    pub struct UnlikelyToDeserialize {
+        pub foo: u32,
+        pub bar: String,
+        #[serde(with = "serde_bytes")]
+        pub baz: Vec<u8>,
+    }
+
+    #[test_fuzz::test_fuzz]
+    fn things_that_probably_wont_deserialize(bytes: Vec<u8>) {
+        match super::decode::<_, UnlikelyToDeserialize>(&bytes) {
+            Ok(_) => { /* unlikely! */ }
+            Err(SerializedBytesError::Deserialize(_)) => { /* likely! */ },
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn thing_that_wont_deserialize() {
+        things_that_probably_wont_deserialize(vec![1, 2, 3]);
+    }
+
     #[test]
     fn default_test() {
         assert_eq!(&vec![192_u8], SerializedBytes::default().bytes());
