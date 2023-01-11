@@ -2,9 +2,6 @@
 
 all: test
 
-test:
-	nix-shell --run hcs-test
-
 fmt:
 	nix-shell --run hn-rust-fmt
 
