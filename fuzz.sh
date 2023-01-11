@@ -1,4 +1,5 @@
 #! /usr/bin/env bash
+set -eu
 cargo test
 
-cargo test-fuzz "$1"
+cargo test-fuzz "$FUZZ_TARGET"
