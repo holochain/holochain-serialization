@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   lint:
-    runs-on: nixos/nix:latest
+    runs-on: nixos/nix
     steps:
       - uses: actions/checkout@v3
       - run: nix-shell --run hn-rust-fmt-check
