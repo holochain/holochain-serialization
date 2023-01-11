@@ -29,9 +29,7 @@ pub mod tests {
 
     #[test_fuzz::test_fuzz]
     pub fn foo_test(s: String) {
-        let foo = Foo {
-            inner: s,
-        };
+        let foo = Foo { inner: s };
 
         // SerializedBytes and TryInto already handled by prelude
         let sb: SerializedBytes = foo.clone().try_into().unwrap();

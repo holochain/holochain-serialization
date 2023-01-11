@@ -478,9 +478,7 @@ pub mod tests {
 
     #[test_fuzz::test_fuzz]
     fn round_any_string(inner: String) {
-        let foo = Foo {
-            inner
-        };
+        let foo = Foo { inner };
         let _: Foo = super::decode(&super::encode(&foo).unwrap()).unwrap();
     }
 
@@ -516,7 +514,7 @@ pub mod tests {
     fn things_that_probably_wont_deserialize(bytes: Vec<u8>) {
         match super::decode::<_, UnlikelyToDeserialize>(&bytes) {
             Ok(_) => { /* unlikely! */ }
-            Err(SerializedBytesError::Deserialize(_)) => { /* likely! */ },
+            Err(SerializedBytesError::Deserialize(_)) => { /* likely! */ }
             _ => unreachable!(),
         }
     }
