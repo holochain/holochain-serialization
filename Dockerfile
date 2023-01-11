@@ -2,4 +2,4 @@ FROM holochain/fuzzbox:base
 
 ADD . .
 
-CMD nix-shell --run ./fuzz.sh
+ENTRYPOINT ["nix-shell", "--run", "./fuzz.sh"]
