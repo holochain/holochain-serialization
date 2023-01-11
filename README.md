@@ -94,7 +94,7 @@ If you want a read only view of the actual messagepack bytes call the `.bytes()`
 You can fuzz this repository as:
 
 ```
-docker run --rm -it holochain/fuzzbox:holochain-serialization
+docker run --rm --env FUZZ_TARGET="<some fuzz target>" -it holochain/fuzzbox:holochain-serialization
 ```
 
 You may need to pull the tag before fuzzing to get the latest code as it is built
