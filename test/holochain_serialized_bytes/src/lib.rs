@@ -27,10 +27,10 @@ pub mod tests {
     // holochain_serial! in prelude
     holochain_serial!(Foo);
 
-    #[test]
-    pub fn foo_test() {
+    #[test_fuzz::test_fuzz]
+    pub fn foo_test(s: String) {
         let foo = Foo {
-            inner: "foo".to_string(),
+            inner: s,
         };
 
         // SerializedBytes and TryInto already handled by prelude
