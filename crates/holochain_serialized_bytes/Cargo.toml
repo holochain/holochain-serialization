@@ -26,6 +26,7 @@ arbitrary = { version = "1.0", features = ["derive"], optional = true }
 [dev-dependencies]
 criterion = "0.3"
 tracing-subscriber="0.2"
+test-fuzz = "=3.0.4"
 
 [[bench]]
 name = "bench"

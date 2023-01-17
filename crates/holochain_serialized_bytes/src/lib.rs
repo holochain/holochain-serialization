@@ -176,7 +176,7 @@ impl std::fmt::Debug for SerializedBytes {
         let mut deserializer = rmp_serde::Deserializer::from_read_ref(&self.0);
         let writer = Vec::new();
         let mut serializer = serde_json::ser::Serializer::new(writer);
-        if let Err(_) = serde_transcode::transcode(&mut deserializer, &mut serializer) {
+        if serde_transcode::transcode(&mut deserializer, &mut serializer).is_err() {
             write!(f, "<invalid msgpack>")
         } else {
             let s = unsafe { String::from_utf8_unchecked(serializer.into_inner()) };
@@ -476,9 +476,20 @@ pub mod tests {
         assert_eq!(sb, sb_2,);
     }
 
+    #[test_fuzz::test_fuzz]
+    fn round_any_string(inner: String) {
+        let foo = Foo { inner };
+        let _: Foo = super::decode(&super::encode(&foo).unwrap()).unwrap();
+    }
+
     #[test]
-    fn provide_own_bytes() {
-        let bytes = vec![1_u8, 90_u8, 155_u8];
+    fn round_a_string() {
+        round_any_string("foo".into());
+    }
+
+    #[test_fuzz::test_fuzz]
+    fn provide_own_bytes(bytes: Vec<u8>) {
+        // let bytes = vec![1_u8, 90_u8, 155_u8];
         let own_bytes = UnsafeBytes::from(bytes.clone());
         let sb: SerializedBytes = own_bytes.clone().into();
 
@@ -489,6 +500,28 @@ pub mod tests {
         assert_eq!(&own_bytes.0, &own_bytes_restored.0,);
         assert_eq!(&bytes, &own_bytes.0);
         assert_eq!(&bytes, &own_bytes_restored.0);
+    }
+
+    #[derive(Deserialize, Debug)]
+    pub struct UnlikelyToDeserialize {
+        pub foo: u32,
+        pub bar: String,
+        #[serde(with = "serde_bytes")]
+        pub baz: Vec<u8>,
+    }
+
+    #[test_fuzz::test_fuzz]
+    fn things_that_probably_wont_deserialize(bytes: Vec<u8>) {
+        match super::decode::<_, UnlikelyToDeserialize>(&bytes) {
+            Ok(_) => { /* unlikely! */ }
+            Err(SerializedBytesError::Deserialize(_)) => { /* likely! */ }
+            _ => unreachable!(),
+        }
+    }
+
+    #[test]
+    fn thing_that_wont_deserialize() {
+        things_that_probably_wont_deserialize(vec![1, 2, 3]);
     }
 
     #[test]
