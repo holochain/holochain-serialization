@@ -2,6 +2,12 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.0.53] - 2023-08-29
+
+## Added
+
+- Added proptest derives
+
 ## [0.0.52] - 2023-01-17
 
 ## Added
