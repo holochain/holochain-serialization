@@ -3,7 +3,7 @@ name: test
 on: [push]
 
 jobs:
-  lint:
+  cargo-test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
