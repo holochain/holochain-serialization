@@ -14,7 +14,7 @@
       perSystem = { config, system, pkgs, ... }:
         {
           devShells.default = pkgs.mkShell {
-            inputsFrom = [ holonix.devShells.${system}.coreDev ];
+            inputsFrom = [ holonix.devShells.${system}.rustDev ];
             packages = with pkgs; [
               # add further packages from nixpkgs
             ];
