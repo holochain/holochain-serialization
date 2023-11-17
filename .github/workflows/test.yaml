@@ -7,6 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v23
       - name: Run fmt
         run: nix build -L .#fmt
       - name: Run clippy
