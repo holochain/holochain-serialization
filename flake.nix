@@ -14,14 +14,10 @@
       perSystem = { config, system, pkgs, ... }:
         {
           devShells.default = pkgs.mkShell {
-            inputsFrom = [ holonix.devShells.${system}.rustDev ];
+            inputsFrom = [ holonix.devShells.${system}.coreDev ];
             packages = with pkgs; [
               # add further packages from nixpkgs
             ];
-          };
-          packages = {
-            fmt = holonix.packages.${system}.build-holochain-tests-static-fmt;
-            clippy = holonix.packages.${system}.build-holochain-tests-static-clippy;
           };
         };
     };
