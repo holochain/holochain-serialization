@@ -1,4 +1,4 @@
-name: test
+name: lint
 
 on: [push]
 
@@ -10,5 +10,7 @@ jobs:
       - uses: cachix/install-nix-action@v23
       - name: Build Nix packages for dev shell
         run: nix develop -c $SHELL -c "rustc --version --verbose"
-      - name: Run tests
-        run: nix develop -c $SHELL -c "cargo test"
+      - name: Run fmt
+        run: nix develop -c $SHELL -c "script-holochain-tests-static-fmt"
+      - name: Run clippy
+        run: nix develop -c $SHELL -c "script-holochain-tests-static-clippy"
