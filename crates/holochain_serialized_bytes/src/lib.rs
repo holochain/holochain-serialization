@@ -310,8 +310,39 @@ impl<'a> TryFrom<&'a SerializedBytes> for SerializedBytes {
 #[cfg(test)]
 pub mod tests {
 
+    use serde_json::Value;
+
     use super::prelude::*;
     use std::convert::TryInto;
+
+    #[test]
+    fn conductor_api() {
+        use rmp_serde::Deserializer;
+
+        #[derive(Serialize, Deserialize, Debug)]
+        #[serde(rename_all = "snake_case", tag = "type", content = "data")]
+        enum ConductorApi {
+            Request { param: i32 },
+        }
+
+        let request = ConductorApi::Request { param: 100 };
+        let request_encoded = encode(&request).unwrap();
+        assert_eq!(
+            request_encoded,
+            [
+                130, 164, 116, 121, 112, 101, 129, 167, 114, 101, 113, 117, 101, 115, 116, 192,
+                164, 100, 97, 116, 97, 129, 165, 112, 97, 114, 97, 109, 100
+            ]
+        );
+
+        let mut deserializer = Deserializer::new(&*request_encoded);
+        let value: Value = Deserialize::deserialize(&mut deserializer).unwrap();
+        let json_string = serde_json::to_string(&value).unwrap();
+        assert_eq!(
+            r#"{"type":{"request":null},"data":{"param":100}}"#,
+            json_string
+        );
+    }
 
     /// struct with a utf8 string in it
     #[derive(Serialize, Deserialize, PartialEq, Debug, Clone, SerializedBytes)]
