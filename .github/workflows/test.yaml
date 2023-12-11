@@ -3,7 +3,7 @@ name: test
 on: [push]
 
 jobs:
-  lint-and-test:
+  test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
