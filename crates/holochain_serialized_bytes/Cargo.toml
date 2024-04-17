@@ -38,3 +38,6 @@ harness = false
 fuzzing = ["arbitrary", "proptest", "proptest-derive"]
 
 trace = ["tracing"]
+
+[lints]
+workspace = true

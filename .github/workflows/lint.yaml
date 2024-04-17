@@ -11,6 +11,6 @@ jobs:
       - name: Build Nix packages for dev shell
         run: nix develop -c $SHELL -c "rustc --version --verbose"
       - name: Run fmt
-        run: nix develop -c $SHELL -c "script-holochain-tests-static-fmt"
+        run: nix develop -c cargo fmt --all -- --check
       - name: Run clippy
-        run: nix develop -c $SHELL -c "script-holochain-tests-static-clippy"
+        run: nix develop -c cargo clippy --all -- --deny warnings
