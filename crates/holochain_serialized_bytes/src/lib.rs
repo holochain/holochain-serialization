@@ -14,9 +14,7 @@ pub fn encode<T: serde::Serialize + std::fmt::Debug>(
     val: &T,
 ) -> Result<Vec<u8>, SerializedBytesError> {
     let buf = Vec::with_capacity(128);
-    let mut se = rmp_serde::encode::Serializer::new(buf)
-        .with_struct_map()
-        .with_string_variants();
+    let mut se = rmp_serde::encode::Serializer::new(buf).with_struct_map();
     val.serialize(&mut se).map_err(|err| {
         #[cfg(feature = "trace")]
         tracing::warn!("Failed to serialize input");
@@ -38,7 +36,7 @@ where
     R: AsRef<[u8]> + ?Sized + std::fmt::Debug,
     T: Deserialize<'a> + std::fmt::Debug,
 {
-    let ret = rmp_serde::from_read_ref(input).map_err(|err| {
+    let ret = rmp_serde::from_slice(input.as_ref()).map_err(|err| {
         #[cfg(feature = "trace")]
         tracing::warn!(
             "Failed to deserialize input into: {}",
@@ -330,18 +328,15 @@ pub mod tests {
         assert_eq!(
             request_encoded,
             [
-                130, 164, 116, 121, 112, 101, 129, 167, 114, 101, 113, 117, 101, 115, 116, 192,
-                164, 100, 97, 116, 97, 129, 165, 112, 97, 114, 97, 109, 100
+                130, 164, 116, 121, 112, 101, 167, 114, 101, 113, 117, 101, 115, 116, 164, 100, 97,
+                116, 97, 129, 165, 112, 97, 114, 97, 109, 100
             ]
         );
 
         let mut deserializer = Deserializer::new(&*request_encoded);
         let value: Value = Deserialize::deserialize(&mut deserializer).unwrap();
         let json_string = serde_json::to_string(&value).unwrap();
-        assert_eq!(
-            r#"{"type":{"request":null},"data":{"param":100}}"#,
-            json_string
-        );
+        assert_eq!(r#"{"type":"request","data":{"param":100}}"#, json_string);
     }
 
     /// struct with a utf8 string in it

@@ -2,6 +2,37 @@
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+[Unreleased]
+## Changed
+- **BREAKING**: Updated dependencies `rmp-serde` and `serde`. Serialization format for Rust enums changed.
+An enum
+```rust
+enum ConductorApi {
+    Request { param: i32 },
+}
+let request = ConductorApi::Request { param: 100 };
+```
+previously serialized to
+```json
+{
+    "type": {
+        "request": null
+    },
+    "data": {
+        "param": 100
+    }
+}
+```
+and now serializes to
+```json
+{
+    "type": "request",
+    "data": {
+        "param": 100
+    }
+}
+```
+
 ## [0.0.53] - 2023-08-29
 
 ## Added

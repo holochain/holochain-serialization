@@ -7,3 +7,10 @@ members = [
 
 [profile.release]
 debug = true
+
+[workspace.lints.clippy]
+style = "deny"
+complexity = "deny"
+perf = "deny"
+correctness = "deny"
+dbg_macro = "deny"
