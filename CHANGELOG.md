@@ -3,6 +3,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 [Unreleased]
+
+## [0.0.54] - 2024-04-17
+
 ## Changed
 - **BREAKING**: Updated dependencies `rmp-serde` and `serde`. Serialization format for Rust enums changed.
 An enum
