@@ -1,18 +1,30 @@
 [package]
 name = "test_holochain_serialized_bytes"
-version = "0.0.55"
+version = "0.0.0"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 description = "test serialized bytes for holochain"
 keywords = ["holochain", "holo", "messagepack", "json", "serialization"]
 categories = ["database"]
 license = "Apache-2.0"
-readme = "README.md"
 documentation = "https://docs.rs/holochain_serialized_bytes"
 repository = "https://github.com/holochain/holochain-serialization"
+edition = "2021"
+publish = false
+
+[[bench]]
+name = "bench"
+harness = false
 
 [dependencies]
 holochain_serialized_bytes = { version = "=0.0.55", path = "../../crates/holochain_serialized_bytes" }
-serde = "=1.0.203"
-
-[dev-dependencies]
+serde = "=1.0.219"
+serde_bytes = "0.11"
+rmp-serde = "=1.3.0"
+serde_json = "1.0"
 test-fuzz = "=3.0.4"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+criterion = "0.5"
+
+[features]
+trace = ["holochain_serialized_bytes/trace"]

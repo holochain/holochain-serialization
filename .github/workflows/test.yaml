@@ -1,14 +1,20 @@
 name: test
 
-on: [push]
+on:
+  pull_request: {}
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: cachix/install-nix-action@v23
+      - uses: cachix/install-nix-action@v31
+      - uses: cachix/cachix-action@v16
+        with:
+          name: holochain-ci
       - name: Build Nix packages for dev shell
-        run: nix develop -c $SHELL -c "rustc --version --verbose"
+        run: nix develop -c rustc --version --verbose
+      - name: Static checks
+        run: nix develop -c make static
       - name: Run tests
-        run: nix develop -c $SHELL -c "cargo test"
+        run: nix develop -c make test

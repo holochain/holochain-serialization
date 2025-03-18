@@ -3,13 +3,13 @@ use criterion::Throughput;
 use criterion::{criterion_group, criterion_main, Criterion};
 use holochain_serialized_bytes::prelude::*;
 
-#[derive(serde::Serialize, serde::Deserialize, SerializedBytes)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, SerializedBytes)]
 struct StringNewType(String);
 
 pub fn round_trip_string(c: &mut Criterion) {
     let mut group = c.benchmark_group("round_trip_string");
 
-    for n in vec![0, 1, 1_000, 1_000_000] {
+    for n in [0, 1, 1_000, 1_000_000] {
         group.throughput(Throughput::Bytes(n as _));
         group.bench_with_input(BenchmarkId::from_parameter(n), &n, |b, &n| {
             b.iter_batched(
@@ -26,9 +26,9 @@ pub fn round_trip_string(c: &mut Criterion) {
     group.finish();
 }
 
-#[derive(serde::Serialize, serde::Deserialize, SerializedBytes)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, SerializedBytes)]
 struct GenericBytesNewType(Vec<u8>);
-#[derive(serde::Serialize, serde::Deserialize, SerializedBytes)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, SerializedBytes)]
 struct SpecializedBytesNewType(#[serde(with = "serde_bytes")] Vec<u8>);
 
 pub fn round_trip_bytes(c: &mut Criterion) {
@@ -51,7 +51,7 @@ pub fn round_trip_bytes(c: &mut Criterion) {
                 });
             }
         };
-    };
+    }
 
     do_it!(GenericBytesNewType);
     do_it!(SpecializedBytesNewType);
@@ -59,7 +59,7 @@ pub fn round_trip_bytes(c: &mut Criterion) {
     group.finish();
 }
 
-#[derive(serde::Serialize, serde::Deserialize, SerializedBytes)]
+#[derive(Debug, serde::Serialize, serde::Deserialize, SerializedBytes)]
 struct SerializedBytesNewType(SerializedBytes);
 
 pub fn round_nested(c: &mut Criterion) {
@@ -83,7 +83,7 @@ pub fn round_nested(c: &mut Criterion) {
                 });
             }
         };
-    };
+    }
 
     do_it!(GenericBytesNewType);
     do_it!(SpecializedBytesNewType);
