@@ -1,6 +1,6 @@
 [package]
 name = "holochain_serialized_bytes_derive"
-version = "0.0.55"
+version = "0.0.56"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 description = "Provides derive macros for holochain_serialized_bytes"
 keywords = ["holochain", "bytes", "serde", "derive"]
