@@ -1,12 +1,13 @@
-.PHONY: all test fmt clean
+.PHONY: all static test
 
-all: test
+all: static test bench
 
-fmt:
-	nix-shell --run "hn-rust-fmt && hn-rust-clippy"
-
-clean:
-	nix-shell --run hn-flush
+static:
+	cargo fmt -- --check
+	cargo clippy --all-targets -- --deny warnings
 
 test:
-	nix-shell --run "cargo test"
+	cargo test
+
+bench:
+	cargo bench

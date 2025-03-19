@@ -1,24 +1,31 @@
 {
-  inputs = {
-    nixpkgs.follows = "holonix/nixpkgs";
+  description = "Flake for Holochain app development";
 
-    versions.url = "github:holochain/holochain?dir=versions/weekly";
-    holonix.url = "github:holochain/holochain";
-    holonix.inputs.versions.follows = "versions";
+  inputs = {
+    holonix.url = "github:holochain/holonix?ref=main";
+
+    nixpkgs.follows = "holonix/nixpkgs";
+    flake-parts.follows = "holonix/flake-parts";
   };
 
-  outputs = inputs@{ holonix, ... }:
-    holonix.inputs.flake-parts.lib.mkFlake { inherit inputs; } {
-      systems = builtins.attrNames holonix.devShells;
+  outputs = inputs@{ flake-parts, ... }: flake-parts.lib.mkFlake { inherit inputs; } {
+    systems = builtins.attrNames inputs.holonix.devShells;
+    perSystem = { inputs', pkgs, ... }: {
+      formatter = pkgs.nixpkgs-fmt;
 
-      perSystem = { config, system, pkgs, ... }:
-        {
-          devShells.default = pkgs.mkShell {
-            inputsFrom = [ holonix.devShells.${system}.coreDev ];
-            packages = with pkgs; [
-              # add further packages from nixpkgs
-            ];
-          };
-        };
+      devShells.default = pkgs.mkShell {
+        packages = (with inputs'.holonix.packages; [
+          rust # For Rust development, with the WASM target included for zome builds
+        ]) ++ (with pkgs; [
+          nodejs_20 # For UI development
+          binaryen # For WASM optimisation
+          # Add any other packages you need here
+        ]);
+
+        shellHook = ''
+          export PS1='\[\033[1;34m\][holonix:\w]\$\[\033[0m\] '
+        '';
+      };
     };
+  };
 }

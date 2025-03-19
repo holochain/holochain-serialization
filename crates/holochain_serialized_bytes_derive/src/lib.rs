@@ -5,17 +5,18 @@
 extern crate quote;
 
 use proc_macro::TokenStream;
+
 fn impl_default_serialized_bytes_macro(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
-        holochain_serial!(#name);
+        ::holochain_serialized_bytes::prelude::holochain_serial!(#name);
     };
     gen.into()
 }
 
 #[proc_macro_derive(SerializedBytes)]
 pub fn default_holochain_serialized_bytes_derive(input: TokenStream) -> TokenStream {
-    // Construct a represntation of Rust code as a syntax tree
+    // Construct a representation of Rust code as a syntax tree
     // that we can manipulate
     let ast = syn::parse(input).unwrap();
 

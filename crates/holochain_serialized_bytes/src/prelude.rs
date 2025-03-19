@@ -10,6 +10,7 @@ pub use crate::holochain_serial;
 pub use crate::SerializedBytes;
 pub use crate::SerializedBytesError;
 pub use crate::UnsafeBytes;
+#[cfg(feature = "derive")]
 pub use holochain_serialized_bytes_derive::SerializedBytes;
 
 pub use crate::decode;

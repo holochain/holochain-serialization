@@ -1,12 +1,9 @@
 [workspace]
-
 members = [
   "crates/holochain_serialized_bytes",
-  "test/holochain_serialized_bytes"
+  "test/holochain_serialized_bytes",
 ]
-
-[profile.release]
-debug = true
+resolver = "2"
 
 [workspace.lints.clippy]
 style = "deny"
