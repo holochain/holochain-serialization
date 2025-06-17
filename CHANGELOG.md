@@ -1,8 +1,19 @@
 # Changelog
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
-This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-[Unreleased]
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [0.0.56] - 2025-06-17
+
+### Changed
+
+- Convert project to using workspace dependencies and package properties (#55) by @ThetaSinner in [#55](https://github.com/holochain/holochain-serialization/pull/55)
+- Add release support (#52) by @ThetaSinner in [#52](https://github.com/holochain/holochain-serialization/pull/52)
+- Add ci_pass check (#51) by @ThetaSinner in [#51](https://github.com/holochain/holochain-serialization/pull/51)
+- Maintenance 03-25 (#50) by @ThetaSinner in [#50](https://github.com/holochain/holochain-serialization/pull/50)
+- Merge pull request #49 from holochain/bump-deps by @ThetaSinner in [#49](https://github.com/holochain/holochain-serialization/pull/49)
 
 ## [0.0.54] - 2024-04-17
 
