@@ -1,21 +1,20 @@
 [package]
 name = "holochain_serialized_bytes_derive"
-version = "0.0.56"
-authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
+version.workspace = true
 description = "Provides derive macros for holochain_serialized_bytes"
-keywords = ["holochain", "bytes", "serde", "derive"]
-categories = ["parsing"]
-license = "Apache-2.0"
 documentation = "https://docs.rs/holochain_serialized_bytes_derive"
-repository = "https://github.com/holochain/holochain-serialization"
-edition = "2021"
+authors.workspace = true
+keywords.workspace = true
+license.workspace = true
+repository.workspace = true
+edition.workspace = true
 
 [lib]
 proc-macro = true
 
 [dependencies]
-syn = "2.0"
-quote = "1.0"
+syn.workspace = true
+quote.workspace = true
 
 [lints]
 workspace = true
