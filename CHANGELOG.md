@@ -2,8 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## \[[0.0.57](https://github.com/holochain/holochain-serialization/compare/v0.0.56...v0.0.57)\] - 2026-04-01
+
+### Bug Fixes
+
+- Clippy issue with unused enum by @ThetaSinner in [#57](https://github.com/holochain/holochain-serialization/pull/57)
+
+### Miscellaneous Tasks
+
+- Update to serde 1.0.228 by @ThetaSinner
+
+### CI
+
+- Update actions and Rust version by @ThetaSinner
 
 ## [0.0.56] - 2025-06-17
 
