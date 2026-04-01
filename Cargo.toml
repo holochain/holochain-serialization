@@ -6,7 +6,7 @@ members = [
 resolver = "2"
 
 [workspace.package]
-version = "0.0.56"
+version = "0.0.57"
 authors = ["Holochain Core Dev Team <devcore@holochain.org>"]
 keywords = ["holochain", "messagepack", "json", "serialization"]
 license = "Apache-2.0"
@@ -24,7 +24,7 @@ thiserror = "2.0"
 serde_bytes = "0.11"
 tracing = "0.1"
 
-holochain_serialized_bytes_derive = { version = "=0.0.56", path = "crates/holochain_serialized_bytes_derive" }
+holochain_serialized_bytes_derive = { version = "=0.0.57", path = "crates/holochain_serialized_bytes_derive" }
 
 # Dev dependencies
 arbitrary = "1.0"
