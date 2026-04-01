@@ -13,6 +13,7 @@ pub mod tests {
         inner: String,
     }
 
+    #[allow(dead_code)]
     enum FooError {
         Serialize,
     }
